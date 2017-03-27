@@ -1,8 +1,5 @@
 from datetime import datetime
 
-GAMES = {}
-GAME_SCHEDULE_URL = "http://statsapi.web.nhl.com/api/v1/schedule?startDate=%s&endDate=%s&expand=schedule.teams,schedule.linescore,schedule.broadcasts.all,schedule.ticket,schedule.game.content.media.epg"
-
 VS_IMGS = {
     "VAN": {
         "MIN": "288086104/1136x640"
@@ -172,11 +169,3 @@ class Game:
 
             return game
         return map(asGame, games)
-
-def GetCache(date, refresh=False):
-    if refresh or date not in GAMES:
-        scheduleUrl = GAME_SCHEDULE_URL % (date, date)
-        schedule = JSON.ObjectFromURL(scheduleUrl)
-        GAMES[date] = Game.fromSchedule(schedule)
-        return GAMES[date]
-    return GAMES[date]  

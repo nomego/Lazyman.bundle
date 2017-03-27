@@ -1,4 +1,10 @@
 import datetime
+import random
+import re
+
+from game import Game
+
+GAME_SCHEDULE_URL = "http://statsapi.web.nhl.com/api/v1/schedule?startDate=%s&endDate=%s&expand=schedule.teams,schedule.linescore,schedule.broadcasts.all,schedule.ticket,schedule.game.content.media.epg"
 
 ART = 'nhlbg.jpg'
 THUMB = 'nhl_logo.png'
@@ -7,7 +13,9 @@ ICON = 'LM.png'
 DAYS_TO_SHOW = 10
 PAGE_LIMIT = 100
 NAME = 'Lazyman'
-GetCache = SharedCodeService.gamecache.GetCache
+
+GAME_CACHE = {}
+STREAM_CACHE = {}
 
 ####################################################################################################
 def Start():
@@ -53,6 +61,13 @@ def Date(date):
 		)
 	return oc
 
+def GetCache(date, refresh=False):
+    if refresh or date not in GAME_CACHE:
+        scheduleUrl = GAME_SCHEDULE_URL % (date, date)
+        schedule = JSON.ObjectFromURL(scheduleUrl)
+        GAME_CACHE[date] = Game.fromSchedule(schedule)
+    return GAME_CACHE[date]  
+
 def getRecapVCO(date, type, recap):
 	def getRecapItems(videos):
 		objects = []
@@ -86,7 +101,63 @@ def getRecapVCO(date, type, recap):
 		thumb = recap.image_url,
 		items = getRecapItems(recap.videos)
 	)
-	
+
+def getStreamVCO(date, game, feed):
+	def getStreamItems():
+		if STREAM_CACHE.get(game.game_id) == None:
+			STREAM_CACHE[game.game_id] = {}
+		if STREAM_CACHE[game.game_id].get(feed.mediaId) != None:
+			return STREAM_CACHE[game.game_id][feed.mediaId]
+		
+		cdn = 'akc'
+		url = "http://mf.svc.nhl.com/m3u8/%s/%s" % (date, feed.mediaId)
+		try:
+			real_url = HTTP.Request(url + cdn).content
+		except:
+			return []
+
+		info_pattern = re.compile('EXT-X-STREAM-INF:BANDWIDTH=(\d+),RESOLUTION=(\d+)x(\d+),CODECS=".+"')
+		streams = HTTP.Request(real_url).content.split("#")
+		objects = []
+
+		for stream in streams:
+			if stream.strip() == "EXTM3U" or stream == "":
+				continue
+			info, url_end = stream.splitlines()
+			stream_meta = info_pattern.search(info)
+			if stream_meta == None:
+				continue
+			bw, width_s, height_s = stream_meta.groups()
+			res_url = real_url.rsplit('/', 1)[0] + "/" + url_end
+			objects.append(
+				MediaObject(
+					protocol = 'hls',
+					video_codec = VideoCodec.H264,
+					video_frame_rate = 30,
+					audio_codec = AudioCodec.AAC,
+					video_resolution = height_s,
+					audio_channels = 2,
+					optimized_for_streaming = True,
+					parts = [
+						PartObject(key = HTTPLiveStreamURL(Callback(PlayStream, url=res_url)))
+					]
+				)
+			)
+
+		STREAM_CACHE[game.game_id][feed.mediaId] = objects
+		return objects
+
+	return VideoClipObject(
+		key = Callback(StreamMetadata, date=date, gameid=game.game_id, mediaId=feed.mediaId),
+		rating_key = feed.mediaId,
+		title = feed.title,
+		summary = game.summary,
+		studio = "NHL",
+		year = int(date[0:4]),
+		art = R(ART),
+		thumb = R(THUMB),
+		items = getStreamItems()
+	)
 
 @route('/video/lazyman/feeds')
 def Feeds(date, game_id):
@@ -100,11 +171,7 @@ def Feeds(date, game_id):
 	oc = ObjectContainer(title2="Feeds for %s" % g.title, no_cache=True)
 
 	for f in filter(lambda f: f.viewable, game.feeds):
-		oc.add(VideoClipObject(
-			url = "http://mf.svc.nhl.com/m3u8/%s/%s" % (date, f.mediaId),
-			title = f.title,
-			summary = g.summary)
-		)
+		oc.add(getStreamVCO(date, game, f))
 
 	for r in game.recaps:
 		if r.videos == None:
@@ -116,6 +183,24 @@ def Feeds(date, game_id):
 			continue
 		oc.add(getRecapVCO(date, "extended_highlights", r))
 
+	return oc
+
+def StreamMetadata(date, gameid, mediaId, **kwargs):
+	game = None
+	feed = None
+	game_cache = GetCache(date)
+	for g in game_cache:
+		if str(g.game_id) == str(gameid):
+			game = g
+			for feed in game.feeds:
+				if feed.mediaId == mediaId:
+					feed = feed
+					break
+		if game != None:
+			break
+
+	oc = ObjectContainer()
+	oc.add(getStreamVCO(date, game, feed))
 	return oc
 
 def RecapMetadata(type, date, recapid):
@@ -137,3 +222,14 @@ def RecapMetadata(type, date, recapid):
 def PlayRecap(url, **kwargs):
 	Log(' --> Final recap_url: %s' % (url))
 	return IndirectResponse(VideoClipObject, key=url)
+
+@indirect
+def PlayStream(url, **kwargs):
+	Log(' --> Final stream url: %s' % (url))
+	return IndirectResponse(VideoClipObject, key=HTTPLiveStreamURL(url))
+
+def GetMediaAuth():
+	salt = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+	garbled = ''.join(random.sample(salt, len(salt)))
+	auth = ''.join([garbled[int(i * random.random()) % len(garbled)] for i in range(0,241)])
+	return auth
