@@ -41,6 +41,7 @@ class Feed(object):
                     'FRENCH': "%s (French)" % (tv_station),
                     'NATIONAL': "%s (National)" % (tv_station),
                     'COMPOSITE': "3-Way Camera (Composite)",
+                    'ISO': 'Multi-Angle',
                     'NONVIEWABLE': "Non-viewable"
                 }[feed_type]
             return Feed(tv_station, item["mediaPlaybackId"], getTitle(item["mediaFeedType"]))
