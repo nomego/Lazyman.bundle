@@ -16,26 +16,29 @@ def GetVsImg(away, home):
     return "https://nhl.bamcontent.com/images/photos/%s/cut.jpeg" % img
 
 class Feed(object):
-    tvStation = None
     mediaId = None
     title = None
     viewable = True
 
-    def __init__(self, tvStation, mediaId, feed_type):
-        self.tvStation = tvStation
+    def __init__(self, mediaId, title):
         self.mediaId = mediaId
-        if feed_type == None:
+        self.title = title
+        if title == "Non-viewable":
             self.viewable = False
-            self.title = "Non-viewable"
-        else:
-            self.title = feed_type
 
     @staticmethod
     def fromContent(content, home_abbr, away_abbr):
         def fromItem(item):
             tv_station = item["callLetters"]
-            def getTitle(feed_type):
-                return {
+            feed_type = item["mediaFeedType"]
+            feed_name = item["feedName"]
+            if feed_name != "":
+                if tv_station != "":
+                    title = "%s (%s %s)" % (feed_name, tv_station, feed_type)
+                else:
+                    title = "%s (%s)" % (feed_name, feed_type)
+            else:
+                title = {
                     'AWAY': "%s (%s Away)" % (tv_station, away_abbr),
                     'HOME': "%s (%s Home)" % (tv_station, home_abbr),
                     'FRENCH': "%s (French)" % (tv_station),
@@ -43,8 +46,8 @@ class Feed(object):
                     'COMPOSITE': "3-Way Camera (Composite)",
                     'ISO': 'Multi-Angle',
                     'NONVIEWABLE': "Non-viewable"
-                }[feed_type]
-            return Feed(tv_station, item["mediaPlaybackId"], getTitle(item["mediaFeedType"]))
+                }.get(feed_type, "%s (%s)" % (tv_station, feed_type))
+            return Feed(item["mediaPlaybackId"], title)
 
         if "media" in content:
             return [fromItem(item)
