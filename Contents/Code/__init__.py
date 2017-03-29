@@ -53,11 +53,15 @@ def Date(date):
 
 	oc = ObjectContainer(title2="Games on %s" % (date), no_cache=True)
 	game_cache = GetCache(date, True)
-	for g in game_cache: 
+	for g in game_cache:
+		thumb = R(THUMB)
+		if len(g.recaps) > 0:
+			thumb = g.recaps[0].image_url
 		oc.add(DirectoryObject(
 			key=Callback(Feeds, date=date, game_id=g.game_id),
 			title=g.title,
-			summary=g.summary)
+			summary=g.summary,
+			thumb=thumb)
 		)
 	return oc
 
@@ -147,6 +151,10 @@ def getStreamVCO(date, game, feed):
 		STREAM_CACHE[game.game_id][feed.mediaId] = objects
 		return objects
 
+	thumb = R(THUMB)
+	if len(game.recaps) > 0:
+		thumb = game.recaps[0].image_url
+
 	return VideoClipObject(
 		key = Callback(StreamMetadata, date=date, gameid=game.game_id, mediaId=feed.mediaId),
 		rating_key = feed.mediaId,
@@ -155,7 +163,7 @@ def getStreamVCO(date, game, feed):
 		studio = "NHL",
 		year = int(date[0:4]),
 		art = R(ART),
-		thumb = R(THUMB),
+		thumb = thumb,
 		items = getStreamItems()
 	)
 
