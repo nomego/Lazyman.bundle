@@ -146,7 +146,10 @@ class Game:
                     dt = datetime(1,1,1) + delta
                     return "Starts in %sh %sm %ss" % (dt.hour, dt.minute, dt.second)
             def record(rec):
-                return "%s-%s-%s" % (rec["wins"], rec["losses"], rec["ot"])
+                if "ot" in rec:
+                    return "%s-%s-%s" % (rec["wins"], rec["losses"], rec["ot"])
+                else:
+                    return "%s-%s" % (rec["wins"], rec["losses"])
             game = Game(g["gamePk"])
             away = g["teams"]["away"]["team"]
             home = g["teams"]["home"]["team"]
