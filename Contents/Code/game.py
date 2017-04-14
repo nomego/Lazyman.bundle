@@ -122,7 +122,7 @@ class Game:
         self.game_id = gameId
 
     def getRecaps(self, type):
-        if type == 'recap':
+        if type == 'recaps':
             return self.recaps
         return self.extended_highlights
 
