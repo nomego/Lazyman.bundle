@@ -31,8 +31,9 @@ class Feed(object):
         def fromItem(item):
             tv_station = item["callLetters"]
             feed_type = item["mediaFeedType"]
-            feed_name = item["feedName"]
-            if feed_name != "":
+            #feed_name = item["feedName"]
+            feed_name = ""
+			if feed_name != "":
                 if tv_station != "":
                     title = "%s (%s %s)" % (feed_name, tv_station, feed_type)
                 else:
@@ -40,18 +41,18 @@ class Feed(object):
             else:
                 title = {
                     'AWAY': "%s (%s Away)" % (tv_station, away_abbr),
-                    'HOME': "%s (%s Home)" % (tv_station, home_abbr),
-                    'FRENCH': "%s (French)" % (tv_station),
-                    'NATIONAL': "%s (National)" % (tv_station),
-                    'COMPOSITE': "3-Way Camera (Composite)",
-                    'ISO': 'Multi-Angle',
-                    'NONVIEWABLE': "Non-viewable"
+                    'HOME': "%s (%s Home)" % (tv_station, home_abbr)#,
+#                    'FRENCH': "%s (French)" % (tv_station),
+#                    'NATIONAL': "%s (National)" % (tv_station),
+#                    'COMPOSITE': "3-Way Camera (Composite)",
+#                    'ISO': 'Multi-Angle',
+#                    'NONVIEWABLE': "Non-viewable"
                 }.get(feed_type, "%s (%s)" % (tv_station, feed_type))
-            return Feed(item["mediaPlaybackId"], title)
-
+            #return Feed(item["mediaPlaybackId"], title)
+			return Feed(item["id"], title)
         if "media" in content:
             return [fromItem(item)
-                    for stream in content["media"]["epg"] if stream["title"] == "NHLTV"
+                    for stream in content["media"]["epg"] if stream["title"] == "MLBTV"#"NHLTV"
                     for item in stream["items"]]
         else:
             return []
@@ -157,20 +158,21 @@ class Game:
             game.away_abbr = away["abbreviation"]
             game.home_abbr = home["abbreviation"]
             game.state = g["status"]["detailedState"]
-            game.time_remaining = remaining(game.state, game.time)
+            #game.time_remaining = remaining(game.state, game.time)
             game.away_full_name = away["name"]
             game.home_full_name = home["name"]
             game.feeds = Feed.fromContent(g["content"], game.home_abbr, game.away_abbr)
-            game.recaps = Recap.fromContent(g["content"], "Recap")
-            game.extended_highlights = Recap.fromContent(g["content"], "Extended Highlights")
+            #game.recaps = Recap.fromContent(g["content"], "Recap")
+            #game.extended_highlights = Recap.fromContent(g["content"], "Extended Highlights")
 
-            game.title = "%s @ %s (%s)" % (away["teamName"], home["teamName"], game.time_remaining)
-            summary_format = "%s (%s) from %s (%s) hosts %s (%s) from %s (%s) at %s"
+            game.title = "%s @ %s (%s)" % (away["teamName"], home["teamName"], )#game.time_remaining)
+            #summary_format = "%s (%s) from %s (%s) hosts %s (%s) from %s (%s) at %s"
+            summary_format = "%s (%s) from %s hosts %s (%s) from %s at %s"
             game.summary = summary_format % (
                 game.home_full_name, record(g["teams"]["home"]["leagueRecord"]),
-                home["division"]["name"], home["conference"]["name"],
+                home["division"]["name"], #home["conference"]["name"],
                 game.away_full_name, record(g["teams"]["away"]["leagueRecord"]),
-                away["division"]["name"], away["conference"]["name"],
+                away["division"]["name"], #away["conference"]["name"],
                 g["venue"]["name"]
             )
 

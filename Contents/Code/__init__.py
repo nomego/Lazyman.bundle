@@ -4,7 +4,8 @@ import re
 
 from game import Game
 
-GAME_SCHEDULE_URL = "http://statsapi.web.nhl.com/api/v1/schedule?startDate=%s&endDate=%s&expand=schedule.teams,schedule.linescore,schedule.broadcasts.all,schedule.ticket,schedule.game.content.media.epg"
+#GAME_SCHEDULE_URL = "http://statsapi.web.nhl.com/api/v1/schedule?startDate=%s&endDate=%s&expand=schedule.teams,schedule.linescore,schedule.broadcasts.all,schedule.ticket,schedule.game.content.media.epg"
+GAME_SCHEDULE_URL = "http://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=%s&endDate=%s&hydrate=team,linescore,flags,liveLookin,person,stats,probablePitcher,game(content(summary,media(epg)),tickets)&language=en"
 
 ART = 'nhlbg.jpg'
 THUMB = 'nhl_logo.png'
@@ -12,7 +13,7 @@ ICON = 'LM.png'
 
 DAYS_TO_SHOW = 10
 PAGE_LIMIT = 100
-NAME = 'Lazyman'
+NAME = 'Lazyman MLB'
 
 GAME_CACHE = {}
 STREAM_CACHE = {}
@@ -114,7 +115,8 @@ def getStreamVCO(date, game, feed):
 			return STREAM_CACHE[game.game_id][feed.mediaId]
 		
 		cdn = 'akc'
-		url = "http://mf.svc.nhl.com/m3u8/%s/%s" % (date, feed.mediaId)
+		#url = "http://mf.svc.nhl.com/m3u8/%s/%s" % (date, feed.mediaId)
+		url = "http://nhl.zipstreams.net/mlb/m3u8/%s/%s" % (date, feed.mediaId)
 		try:
 			real_url = HTTP.Request(url + cdn).content
 		except:
@@ -125,7 +127,10 @@ def getStreamVCO(date, game, feed):
 		objects = []
 
 		for stream in streams:
-			if stream.strip() == "EXTM3U" or stream == "":
+			try:
+				info, url_end = stream.splitlines()
+			except ValueError:
+				Log(stream)
 				continue
 			info, url_end = stream.splitlines()
 			stream_meta = info_pattern.search(info)
