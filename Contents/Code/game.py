@@ -33,7 +33,7 @@ class Feed(object):
             feed_type = item["mediaFeedType"]
             #feed_name = item["feedName"]
             feed_name = ""
-			if feed_name != "":
+            if feed_name != "":
                 if tv_station != "":
                     title = "%s (%s %s)" % (feed_name, tv_station, feed_type)
                 else:
@@ -49,7 +49,7 @@ class Feed(object):
 #                    'NONVIEWABLE': "Non-viewable"
                 }.get(feed_type, "%s (%s)" % (tv_station, feed_type))
             #return Feed(item["mediaPlaybackId"], title)
-			return Feed(item["id"], title)
+            return Feed(item["id"], title)
         if "media" in content:
             return [fromItem(item)
                     for stream in content["media"]["epg"] if stream["title"] == "MLBTV"#"NHLTV"
@@ -165,7 +165,8 @@ class Game:
             #game.recaps = Recap.fromContent(g["content"], "Recap")
             #game.extended_highlights = Recap.fromContent(g["content"], "Extended Highlights")
 
-            game.title = "%s @ %s (%s)" % (away["teamName"], home["teamName"], )#game.time_remaining)
+            #game.title = "%s @ %s (%s)" % (away["teamName"], home["teamName"], game.time_remaining)
+            game.title = "%s @ %s" % (away["teamName"], home["teamName"])
             #summary_format = "%s (%s) from %s (%s) hosts %s (%s) from %s (%s) at %s"
             summary_format = "%s (%s) from %s hosts %s (%s) from %s at %s"
             game.summary = summary_format % (
