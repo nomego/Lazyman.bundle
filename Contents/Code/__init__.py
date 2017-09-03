@@ -13,7 +13,7 @@ THUMB_NHL = 'nhl_logo.png'
 THUMB_MLB = 'mlb_logo.jpg'
 ICON = 'LM.png'
 
-DAYS_TO_SHOW = 150
+DAYS_TO_SHOW = 10
 PAGE_LIMIT = 100
 NAME = 'Lazyman'
 
