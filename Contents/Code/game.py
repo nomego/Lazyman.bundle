@@ -62,19 +62,20 @@ class Recap(object):
     title = None
     summary = None
     year = None
-    studio = "NHL"
+    studio = None
     tagline = None
     duration = None
     image_url = None
     videos = []
 
     @staticmethod
-    def fromContent(content, content_title):
+    def fromContent(content, content_title, sport):
         def fromItem(item):
             recap = Recap()
             recap.title = item["title"]
             recap.summary = item["description"]
             recap.year = int(item["date"][0:4])
+            recap.studio = sport
             recap.tagline = item["blurb"]
             recap.rid = item["id"]
             min, sec = item["duration"].split(":")
@@ -103,6 +104,7 @@ class Recap(object):
 
 class Game:
     game_id = None
+    sport = None
     time = None
     state = None
     time_remaining = None
@@ -131,6 +133,10 @@ class Game:
     def fromSchedule(data):
         if data["totalItems"] <= 0 or len(data["dates"]) == 0:
             return []
+        if "MLB" in data["copyright"]:
+        	sport = "mlb"
+        else:
+        	sport = "nhl"
         games = data["dates"][0]["games"]
         def asGame(g):
             def remaining(state, time):
@@ -158,24 +164,39 @@ class Game:
             game.away_abbr = away["abbreviation"]
             game.home_abbr = home["abbreviation"]
             game.state = g["status"]["detailedState"]
-            #game.time_remaining = remaining(game.state, game.time)
+            game.sport = sport
+            
+            if sport == "nhl":
+                game.time_remaining = remaining(game.state, game.time)
             game.away_full_name = away["name"]
             game.home_full_name = home["name"]
             game.feeds = Feed.fromContent(g["content"], game.home_abbr, game.away_abbr)
-            #game.recaps = Recap.fromContent(g["content"], "Recap")
-            #game.extended_highlights = Recap.fromContent(g["content"], "Extended Highlights")
+            if sport == "nhl":
+                game.recaps = Recap.fromContent(g["content"], "Recap", "NHL")
+                game.extended_highlights = Recap.fromContent(g["content"], "Extended Highlights", "NHL")
+            #else:
+            	#game.recaps = Recap.fromContent(g["content"], "Daily Recap", "MLB")
+            	#game.extended_highlights = Recap.fromContent(g["content"], "Extended Highlights", "MLB")
 
-            #game.title = "%s @ %s (%s)" % (away["teamName"], home["teamName"], game.time_remaining)
-            game.title = "%s @ %s" % (away["teamName"], home["teamName"])
-            #summary_format = "%s (%s) from %s (%s) hosts %s (%s) from %s (%s) at %s"
-            summary_format = "%s (%s) from %s hosts %s (%s) from %s at %s"
-            game.summary = summary_format % (
-                game.home_full_name, record(g["teams"]["home"]["leagueRecord"]),
-                home["division"]["name"], #home["conference"]["name"],
-                game.away_full_name, record(g["teams"]["away"]["leagueRecord"]),
-                away["division"]["name"], #away["conference"]["name"],
-                g["venue"]["name"]
-            )
+            if sport == "nhl":
+                game.title = "%s @ %s (%s)" % (away["teamName"], home["teamName"], game.time_remaining)
+                summary_format = "%s (%s) from %s (%s) hosts %s (%s) from %s (%s) at %s"
+                game.summary = summary_format % (
+                    game.home_full_name, record(g["teams"]["home"]["leagueRecord"]),
+                    home["division"]["name"], home["conference"]["name"],
+                    game.away_full_name, record(g["teams"]["away"]["leagueRecord"]),
+                    away["division"]["name"], away["conference"]["name"],
+                    g["venue"]["name"]
+                )
+            else:
+                game.title = "%s @ %s" % (away["teamName"], home["teamName"])
+                summary_format = "%s (%s) from %s hosts %s (%s) from %s at %s"
+                game.summary = summary_format % (
+                    game.home_full_name, record(g["teams"]["home"]["leagueRecord"]),
+                    home["division"]["name"], 
+                    game.away_full_name, record(g["teams"]["away"]["leagueRecord"]),
+                    away["division"]["name"], g["venue"]["name"]
+                )
 
             return game
         return map(asGame, games)

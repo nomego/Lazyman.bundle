@@ -4,14 +4,16 @@ import re
 
 from game import Game
 
-#GAME_SCHEDULE_URL = "http://statsapi.web.nhl.com/api/v1/schedule?startDate=%s&endDate=%s&expand=schedule.teams,schedule.linescore,schedule.broadcasts.all,schedule.ticket,schedule.game.content.media.epg"
-GAME_SCHEDULE_URL = "http://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=%s&endDate=%s&hydrate=team,linescore,flags,liveLookin,person,stats,probablePitcher,game(content(summary,media(epg)),tickets)&language=en"
+GAME_SCHEDULE_URL_NHL = "http://statsapi.web.nhl.com/api/v1/schedule?startDate=%s&endDate=%s&expand=schedule.teams,schedule.linescore,schedule.broadcasts.all,schedule.ticket,schedule.game.content.media.epg"
+GAME_SCHEDULE_URL_MLB = "http://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=%s&endDate=%s&hydrate=team,linescore,flags,liveLookin,person,stats,probablePitcher,game(content(summary,media(epg)),tickets)&language=en"
 
-ART = 'nhlbg.jpg'
-THUMB = 'nhl_logo.png'
+ART_NHL = 'nhlbg.jpg'
+ART_MLB = 'mlbbg.jpg'
+THUMB_NHL = 'nhl_logo.png'
+THUMB_MLB = 'mlb_logo.png'
 ICON = 'LM.png'
 
-DAYS_TO_SHOW = 10
+DAYS_TO_SHOW = 147
 PAGE_LIMIT = 100
 NAME = 'Lazyman MLB'
 
@@ -22,27 +24,38 @@ STREAM_CACHE = {}
 def Start():
 
 	ObjectContainer.title1 = NAME
-	ObjectContainer.art = R(ART)
-	DirectoryObject.art = R(ART)
-	DirectoryObject.thumb = R(THUMB)
-	VideoClipObject.art = R(ART)
-	VideoClipObject.thumb = R(THUMB)
+	ObjectContainer.art = R(ART_MLB)
+	DirectoryObject.art = R(ART_MLB)
+	DirectoryObject.thumb = R(THUMB_MLB)
+	VideoClipObject.art = R(ART_MLB)
+	VideoClipObject.thumb = R(THUMB_MLB)
 
 	HTTP.Headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.117 Safari/537.36'
 	HTTP.CacheTime = 0
 
 ####################################################################################################
-@handler('/video/lazyman', NAME, art=ART, thumb=ICON)
+@handler('/video/lazyman', NAME, art=ICON, thumb=ICON)
 def MainMenu():
+	oc = ObjectContainer()
+	oc.add(DirectoryObject(
+		key=Callback(SelectDate, sport="nhl"),
+		title="NHL"
+	))
+	oc.add(DirectoryObject(
+		key=Callback(SelectDate, sport="mlb"),
+		title="MLB"
+	))
+	return oc
 
+def SelectDate(sport):
 	oc = ObjectContainer()
 	time_delta = datetime.timedelta(days=1)
 	date = datetime.date.today()
 
 	for i in range(DAYS_TO_SHOW):
 		oc.add(DirectoryObject(
-			key=Callback(Date, date=date),
-			title=date.strftime("%d %B %Y"))
+			key=Callback(Date, date=date, sport=sport),
+			title=date.strftime("%d %B %Y")),
 		)
 		date = date - time_delta
 
@@ -50,30 +63,36 @@ def MainMenu():
 
 ####################################################################################################
 @route('/video/lazyman/date')
-def Date(date):
+def Date(date, sport):
 
 	oc = ObjectContainer(title2="Games on %s" % (date), no_cache=True)
-	game_cache = GetCache(date, True)
+	game_cache = GetCache(date, sport, True)
 	for g in game_cache:
-		thumb = R(THUMB)
+		if sport=="mlb":
+			thumb = R(THUMB_MLB)
+		else:
+			thumb = R(THUMB_NHL)
 		if len(g.recaps) > 0:
 			thumb = g.recaps[0].image_url
 		oc.add(DirectoryObject(
-			key=Callback(Feeds, date=date, game_id=g.game_id),
+			key=Callback(Feeds, date=date, game_id=g.game_id, sport=g.sport),
 			title=g.title,
 			summary=g.summary,
 			thumb=thumb)
 		)
 	return oc
 
-def GetCache(date, refresh=False):
-    if refresh or date not in GAME_CACHE:
-        scheduleUrl = GAME_SCHEDULE_URL % (date, date)
-        schedule = JSON.ObjectFromURL(scheduleUrl)
-        GAME_CACHE[date] = Game.fromSchedule(schedule)
-    return GAME_CACHE[date]  
+def GetCache(date, sport, refresh=False):
+	if refresh or date not in GAME_CACHE:
+		if sport == "mlb":
+			scheduleUrl = GAME_SCHEDULE_URL_MLB % (date, date)
+		else:
+			scheduleUrl = GAME_SCHEDULE_URL_NHL % (date, date)
+		schedule = JSON.ObjectFromURL(scheduleUrl)
+		GAME_CACHE[date] = Game.fromSchedule(schedule)
+	return GAME_CACHE[date]  
 
-def getRecapVCO(date, type, recap):
+def getRecapVCO(date, type, recap, sport):
 	def getRecapItems(videos):
 		objects = []
 		for video in videos:
@@ -94,7 +113,7 @@ def getRecapVCO(date, type, recap):
 		return objects
 
 	return VideoClipObject(
-		key = Callback(RecapMetadata, type=type, date=date, recapid=recap.rid),
+		key = Callback(RecapMetadata, type=type, date=date, recapid=recap.rid, sport=sport),
 		rating_key = recap.rid,
 		title = recap.title,
 		summary = recap.summary,
@@ -115,8 +134,10 @@ def getStreamVCO(date, game, feed):
 			return STREAM_CACHE[game.game_id][feed.mediaId]
 		
 		cdn = 'akc'
-		#url = "http://mf.svc.nhl.com/m3u8/%s/%s" % (date, feed.mediaId)
-		url = "http://nhl.zipstreams.net/mlb/m3u8/%s/%s" % (date, feed.mediaId)
+		if game.sport == "nhl":
+			url = "http://mf.svc.nhl.com/m3u8/%s/%s" % (date, feed.mediaId)
+		else:
+		   url = "http://nhl.zipstreams.net/mlb/m3u8/%s/%s" % (date, feed.mediaId)
 		try:
 			real_url = HTTP.Request(url + cdn).content
 		except:
@@ -156,26 +177,26 @@ def getStreamVCO(date, game, feed):
 		STREAM_CACHE[game.game_id][feed.mediaId] = objects
 		return objects
 
-	thumb = R(THUMB)
+	thumb = R(THUMB_MLB)
 	if len(game.recaps) > 0:
 		thumb = game.recaps[0].image_url
 
 	return VideoClipObject(
-		key = Callback(StreamMetadata, date=date, gameid=game.game_id, mediaId=feed.mediaId),
+		key = Callback(StreamMetadata, date=date, gameid=game.game_id, mediaId=feed.mediaId, sport=game.sport),
 		rating_key = feed.mediaId,
 		title = feed.title,
 		summary = game.summary,
-		studio = "NHL",
+		studio = game.sport.upper(),
 		year = int(date[0:4]),
-		art = R(ART),
+		art = R(ART_MLB),
 		thumb = thumb,
 		items = getStreamItems()
 	)
 
 @route('/video/lazyman/feeds')
-def Feeds(date, game_id):
+def Feeds(date, game_id, sport):
 	game = None
-	game_cache = GetCache(date)
+	game_cache = GetCache(date, sport)
 	for g in game_cache:
 		if str(g.game_id) == str(game_id):
 			game = g
@@ -189,19 +210,19 @@ def Feeds(date, game_id):
 	for r in game.recaps:
 		if r.videos == None:
 			continue
-		oc.add(getRecapVCO(date, "recaps", r))
+		oc.add(getRecapVCO(date, "recaps", r, sport))
 
 	for r in game.extended_highlights:
 		if r.videos == None:
 			continue
-		oc.add(getRecapVCO(date, "extended_highlights", r))
+		oc.add(getRecapVCO(date, "extended_highlights", r, sport))
 
 	return oc
 
-def StreamMetadata(date, gameid, mediaId, **kwargs):
+def StreamMetadata(date, gameid, mediaId, sport, **kwargs):
 	game = None
 	feed = None
-	game_cache = GetCache(date)
+	game_cache = GetCache(date, sport)
 	for g in game_cache:
 		if str(g.game_id) == str(gameid):
 			game = g
@@ -216,8 +237,8 @@ def StreamMetadata(date, gameid, mediaId, **kwargs):
 	oc.add(getStreamVCO(date, game, feed))
 	return oc
 
-def RecapMetadata(type, date, recapid):
-	game_cache = GetCache(date)
+def RecapMetadata(type, date, recapid, sport):
+	game_cache = GetCache(date, sport)
 	recap = None
 	for g in game_cache:
 		for r in g.getRecaps(type):
@@ -228,7 +249,7 @@ def RecapMetadata(type, date, recapid):
 			break
 
 	oc = ObjectContainer()
-	oc.add(getRecapVCO(date, type, recap))
+	oc.add(getRecapVCO(date, type, recap, sport))
 	return oc
 
 @indirect
