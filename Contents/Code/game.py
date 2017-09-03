@@ -1,4 +1,5 @@
 from datetime import datetime
+from datetime import timedelta
 
 VS_IMGS = {
     "VAN": {
@@ -31,8 +32,10 @@ class Feed(object):
         def fromItem(item):
             tv_station = item["callLetters"]
             feed_type = item["mediaFeedType"]
-            #feed_name = item["feedName"]
-            feed_name = ""
+            try:
+            	feed_name = item["feedName"]
+            except KeyError:
+            	feed_name = ""
             if feed_name != "":
                 if tv_station != "":
                     title = "%s (%s %s)" % (feed_name, tv_station, feed_type)
@@ -41,18 +44,20 @@ class Feed(object):
             else:
                 title = {
                     'AWAY': "%s (%s Away)" % (tv_station, away_abbr),
-                    'HOME': "%s (%s Home)" % (tv_station, home_abbr)#,
-#                    'FRENCH': "%s (French)" % (tv_station),
-#                    'NATIONAL': "%s (National)" % (tv_station),
-#                    'COMPOSITE': "3-Way Camera (Composite)",
-#                    'ISO': 'Multi-Angle',
-#                    'NONVIEWABLE': "Non-viewable"
+                    'HOME': "%s (%s Home)" % (tv_station, home_abbr),
+                   'FRENCH': "%s (French)" % (tv_station),
+                   'NATIONAL': "%s (National)" % (tv_station),
+                   'COMPOSITE': "3-Way Camera (Composite)",
+                   'ISO': 'Multi-Angle',
+                   'NONVIEWABLE': "Non-viewable"
                 }.get(feed_type, "%s (%s)" % (tv_station, feed_type))
-            #return Feed(item["mediaPlaybackId"], title)
-            return Feed(item["id"], title)
+            if "id" in item:
+            	return Feed(item["id"], title)
+            else:
+            	return Feed(item["mediaPlaybackId"], title)
         if "media" in content:
             return [fromItem(item)
-                    for stream in content["media"]["epg"] if stream["title"] == "MLBTV"#"NHLTV"
+                    for stream in content["media"]["epg"] if stream["title"] in ["MLBTV", "NHLTV"]
                     for item in stream["items"]]
         else:
             return []
@@ -189,7 +194,7 @@ class Game:
                     g["venue"]["name"]
                 )
             else:
-                game.title = "%s @ %s" % (away["teamName"], home["teamName"])
+                game.title = "%s @ %s (%s)" % (away["teamName"], home["teamName"], datetime.strftime(game.time-timedelta(hours=4), "%I:%M%p").lstrip("0"))
                 summary_format = "%s (%s) from %s hosts %s (%s) from %s at %s"
                 game.summary = summary_format % (
                     game.home_full_name, record(g["teams"]["home"]["leagueRecord"]),

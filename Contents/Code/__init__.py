@@ -10,12 +10,12 @@ GAME_SCHEDULE_URL_MLB = "http://statsapi.mlb.com/api/v1/schedule?sportId=1&start
 ART_NHL = 'nhlbg.jpg'
 ART_MLB = 'mlbbg.jpg'
 THUMB_NHL = 'nhl_logo.png'
-THUMB_MLB = 'mlb_logo.png'
+THUMB_MLB = 'mlb_logo.jpg'
 ICON = 'LM.png'
 
-DAYS_TO_SHOW = 147
+DAYS_TO_SHOW = 10
 PAGE_LIMIT = 100
-NAME = 'Lazyman MLB'
+NAME = 'Lazyman'
 
 GAME_CACHE = {}
 STREAM_CACHE = {}
@@ -48,7 +48,7 @@ def MainMenu():
 	return oc
 
 def SelectDate(sport):
-	oc = ObjectContainer()
+	oc = ObjectContainer(title2="Select Date")
 	time_delta = datetime.timedelta(days=1)
 	date = datetime.date.today()
 
