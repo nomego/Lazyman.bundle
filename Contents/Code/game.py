@@ -2,7 +2,7 @@ from datetime import datetime
 from datetime import timedelta
 
 VS_IMGS = {
-	"VAN": {
+    "VAN": {
 		"MIN": "288086104/1136x640"
 	}
 }
