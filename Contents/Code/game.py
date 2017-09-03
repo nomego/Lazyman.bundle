@@ -33,9 +33,9 @@ class Feed(object):
             tv_station = item["callLetters"]
             feed_type = item["mediaFeedType"]
             try:
-            	feed_name = item["feedName"]
+                feed_name = item["feedName"]
             except KeyError:
-            	feed_name = ""
+                feed_name = ""
             if feed_name != "":
                 if tv_station != "":
                     title = "%s (%s %s)" % (feed_name, tv_station, feed_type)
@@ -52,9 +52,9 @@ class Feed(object):
                    'NONVIEWABLE': "Non-viewable"
                 }.get(feed_type, "%s (%s)" % (tv_station, feed_type))
             if "id" in item:
-            	return Feed(item["id"], title)
+                return Feed(item["id"], title)
             else:
-            	return Feed(item["mediaPlaybackId"], title)
+                return Feed(item["mediaPlaybackId"], title)
         if "media" in content:
             return [fromItem(item)
                     for stream in content["media"]["epg"] if stream["title"] in ["MLBTV", "NHLTV"]
@@ -83,20 +83,27 @@ class Recap(object):
             recap.studio = sport
             recap.tagline = item["blurb"]
             recap.rid = item["id"]
-            min, sec = item["duration"].split(":")
-            recap.duration = (int(min) * 60 + int(sec)) * 1000
+            try:
+                min, sec = item["duration"].split(":")
+                hr = 0
+            except ValueError:
+                hr, min, sec = item["duration"].split(":")
+            recap.duration = (int(hr) * 3600 + int(min) * 60 + int(sec)) * 1000
 
             widest = 0
             pcut = None
             for res in item["image"]["cuts"]:
-                cut = item["image"]["cuts"][res]
+                try:
+                    cut = item["image"]["cuts"][res]
+                except:
+                    cut = res
                 if cut["width"] > widest:
                     pcut = cut
                     widest = cut["width"]
-
+            
             recap.image_url = pcut["src"]
             recap.videos = [vid for vid in item["playbacks"] if vid["name"][0:5] == "FLASH"]
-
+            
             return recap
 
         if "media" in content:
@@ -139,9 +146,9 @@ class Game:
         if data["totalItems"] <= 0 or len(data["dates"]) == 0:
             return []
         if "MLB" in data["copyright"]:
-        	sport = "mlb"
+            sport = "mlb"
         else:
-        	sport = "nhl"
+            sport = "nhl"
         games = data["dates"][0]["games"]
         def asGame(g):
             def remaining(state, time):
@@ -179,9 +186,9 @@ class Game:
             if sport == "nhl":
                 game.recaps = Recap.fromContent(g["content"], "Recap", "NHL")
                 game.extended_highlights = Recap.fromContent(g["content"], "Extended Highlights", "NHL")
-            #else:
-            	#game.recaps = Recap.fromContent(g["content"], "Daily Recap", "MLB")
-            	#game.extended_highlights = Recap.fromContent(g["content"], "Extended Highlights", "MLB")
+            else:
+                game.recaps = Recap.fromContent(g["content"], "Daily Recap", "MLB")
+                game.extended_highlights = Recap.fromContent(g["content"], "Extended Highlights", "MLB")
 
             if sport == "nhl":
                 game.title = "%s @ %s (%s)" % (away["teamName"], home["teamName"], game.time_remaining)
