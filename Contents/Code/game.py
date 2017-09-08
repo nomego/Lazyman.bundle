@@ -1,4 +1,5 @@
 from datetime import datetime
+from datetime import timedelta
 
 VS_IMGS = {
     "VAN": {
@@ -31,7 +32,10 @@ class Feed(object):
         def fromItem(item):
             tv_station = item["callLetters"]
             feed_type = item["mediaFeedType"]
-            feed_name = item["feedName"]
+            try:
+                feed_name = item["feedName"]
+            except KeyError:
+                feed_name = ""
             if feed_name != "":
                 if tv_station != "":
                     title = "%s (%s %s)" % (feed_name, tv_station, feed_type)
@@ -41,17 +45,19 @@ class Feed(object):
                 title = {
                     'AWAY': "%s (%s Away)" % (tv_station, away_abbr),
                     'HOME': "%s (%s Home)" % (tv_station, home_abbr),
-                    'FRENCH': "%s (French)" % (tv_station),
-                    'NATIONAL': "%s (National)" % (tv_station),
-                    'COMPOSITE': "3-Way Camera (Composite)",
-                    'ISO': 'Multi-Angle',
-                    'NONVIEWABLE': "Non-viewable"
+                   'FRENCH': "%s (French)" % (tv_station),
+                   'NATIONAL': "%s (National)" % (tv_station),
+                   'COMPOSITE': "3-Way Camera (Composite)",
+                   'ISO': 'Multi-Angle',
+                   'NONVIEWABLE': "Non-viewable"
                 }.get(feed_type, "%s (%s)" % (tv_station, feed_type))
-            return Feed(item["mediaPlaybackId"], title)
-
+            if "id" in item:
+                return Feed(item["id"], title)
+            else:
+                return Feed(item["mediaPlaybackId"], title)
         if "media" in content:
             return [fromItem(item)
-                    for stream in content["media"]["epg"] if stream["title"] == "NHLTV"
+                    for stream in content["media"]["epg"] if stream["title"] in ["MLBTV", "NHLTV"]
                     for item in stream["items"]]
         else:
             return []
@@ -61,35 +67,43 @@ class Recap(object):
     title = None
     summary = None
     year = None
-    studio = "NHL"
+    studio = None
     tagline = None
     duration = None
     image_url = None
     videos = []
 
     @staticmethod
-    def fromContent(content, content_title):
+    def fromContent(content, content_title, sport):
         def fromItem(item):
             recap = Recap()
             recap.title = item["title"]
             recap.summary = item["description"]
             recap.year = int(item["date"][0:4])
+            recap.studio = sport
             recap.tagline = item["blurb"]
             recap.rid = item["id"]
-            min, sec = item["duration"].split(":")
-            recap.duration = (int(min) * 60 + int(sec)) * 1000
+            try:
+                min, sec = item["duration"].split(":")
+                hr = 0
+            except ValueError:
+                hr, min, sec = item["duration"].split(":")
+            recap.duration = (int(hr) * 3600 + int(min) * 60 + int(sec)) * 1000
 
             widest = 0
             pcut = None
             for res in item["image"]["cuts"]:
-                cut = item["image"]["cuts"][res]
+                try:
+                    cut = item["image"]["cuts"][res]
+                except:
+                    cut = res
                 if cut["width"] > widest:
                     pcut = cut
                     widest = cut["width"]
-
+            
             recap.image_url = pcut["src"]
             recap.videos = [vid for vid in item["playbacks"] if vid["name"][0:5] == "FLASH"]
-
+            
             return recap
 
         if "media" in content:
@@ -102,6 +116,7 @@ class Recap(object):
 
 class Game:
     game_id = None
+    sport = None
     time = None
     state = None
     time_remaining = None
@@ -130,6 +145,10 @@ class Game:
     def fromSchedule(data):
         if data["totalItems"] <= 0 or len(data["dates"]) == 0:
             return []
+        if "MLB" in data["copyright"]:
+            sport = "mlb"
+        else:
+            sport = "nhl"
         games = data["dates"][0]["games"]
         def asGame(g):
             def remaining(state, time):
@@ -157,22 +176,39 @@ class Game:
             game.away_abbr = away["abbreviation"]
             game.home_abbr = home["abbreviation"]
             game.state = g["status"]["detailedState"]
-            game.time_remaining = remaining(game.state, game.time)
+            game.sport = sport
+            
+            if sport == "nhl":
+                game.time_remaining = remaining(game.state, game.time)
             game.away_full_name = away["name"]
             game.home_full_name = home["name"]
             game.feeds = Feed.fromContent(g["content"], game.home_abbr, game.away_abbr)
-            game.recaps = Recap.fromContent(g["content"], "Recap")
-            game.extended_highlights = Recap.fromContent(g["content"], "Extended Highlights")
+            if sport == "nhl":
+                game.recaps = Recap.fromContent(g["content"], "Recap", "NHL")
+                game.extended_highlights = Recap.fromContent(g["content"], "Extended Highlights", "NHL")
+            else:
+                game.recaps = Recap.fromContent(g["content"], "Daily Recap", "MLB")
+                game.extended_highlights = Recap.fromContent(g["content"], "Extended Highlights", "MLB")
 
-            game.title = "%s @ %s (%s)" % (away["teamName"], home["teamName"], game.time_remaining)
-            summary_format = "%s (%s) from %s (%s) hosts %s (%s) from %s (%s) at %s"
-            game.summary = summary_format % (
-                game.home_full_name, record(g["teams"]["home"]["leagueRecord"]),
-                home["division"]["name"], home["conference"]["name"],
-                game.away_full_name, record(g["teams"]["away"]["leagueRecord"]),
-                away["division"]["name"], away["conference"]["name"],
-                g["venue"]["name"]
-            )
+            if sport == "nhl":
+                game.title = "%s @ %s (%s)" % (away["teamName"], home["teamName"], game.time_remaining)
+                summary_format = "%s (%s) from %s (%s) hosts %s (%s) from %s (%s) at %s"
+                game.summary = summary_format % (
+                    game.home_full_name, record(g["teams"]["home"]["leagueRecord"]),
+                    home["division"]["name"], home["conference"]["name"],
+                    game.away_full_name, record(g["teams"]["away"]["leagueRecord"]),
+                    away["division"]["name"], away["conference"]["name"],
+                    g["venue"]["name"]
+                )
+            else:
+                game.title = "%s @ %s (%s)" % (away["teamName"], home["teamName"], datetime.strftime(game.time-timedelta(hours=4), "%I:%M%p").lstrip("0"))
+                summary_format = "%s (%s) from %s hosts %s (%s) from %s at %s"
+                game.summary = summary_format % (
+                    game.home_full_name, record(g["teams"]["home"]["leagueRecord"]),
+                    home["division"]["name"], 
+                    game.away_full_name, record(g["teams"]["away"]["leagueRecord"]),
+                    away["division"]["name"], g["venue"]["name"]
+                )
 
             return game
         return map(asGame, games)
