@@ -22,7 +22,7 @@ Recaps and highlights are not part of the Lazyman solution but is offered in the
 ### Working
 * Web client
 * Android app
-* Casting from the Android app to Chromecast
+* Casting from the Android/iOS app to Chromecast
 * Plex Media Player on macOS
 * OpenPHT (unspecified)
 * Playstation 4 app
@@ -30,3 +30,6 @@ Recaps and highlights are not part of the Lazyman solution but is offered in the
 * Roku (unconfirmed)
   * Plex app can only play recaps/highlights
   * Roku Media Player can only play streams (replays, live) (Thanks Sinematikz)
+
+### Non-Working
+* iOS app
