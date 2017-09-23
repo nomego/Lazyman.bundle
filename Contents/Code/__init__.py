@@ -56,10 +56,9 @@ def SelectDate(sport):
 	 		)
 			date = date - time_delta
 	else:
-		daysWithGames = []
 		time_delta = datetime.timedelta(days=30)
 
-		while len(daysWithGames) < GAMES_TO_SHOW:
+		while len(oc.objects) < GAMES_TO_SHOW:
 			# Look 'time_delta' days back for games that have occurred
 			scheduleUrl = GAME_SCHEDULE_URL_NHL % (date - time_delta, date)
 			schedule = JSON.ObjectFromURL(scheduleUrl)
@@ -70,23 +69,19 @@ def SelectDate(sport):
 
 				# The list is reversed so we get more recent dates first
 				for day in reversed(schedule['dates']):
-					daysWithGames.append(day['date'])
+					# The string is in YEAR-MONTH-DAY format
+					splitDate = day['date'].split('-')
 
+					# Create a 'date' object
+					tempDate = datetime.date(int(splitDate[0]), int(splitDate[1]), int(splitDate[2]))
+
+					# Add the date
+					oc.add(DirectoryObject(
+						key=Callback(Date, date=tempDate, sport=sport),
+						title=day['date']),
+					)
 			# Change the date by 'time_delta' to contine looking for more games
 			date = date - time_delta
-
-		for i in daysWithGames:
-			# The string is in YEAR-MONTH-DAY format
-			temp = i.split('-')
-
-			# Create a 'date' object
-			date = datetime.date(int(temp[0]), int(temp[1]), int(temp[2]))
-
-			# Add the date
-			oc.add(DirectoryObject(
-				key=Callback(Date, date=date, sport=sport),
-				title=i),
-			)
 
 	return oc 
 
