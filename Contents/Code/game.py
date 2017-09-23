@@ -21,10 +21,11 @@ class Feed(object):
     title = None
     viewable = True
 
-    def __init__(self, mediaId, title):
+    def __init__(self, mediaId, title, mediaState):
         self.mediaId = mediaId
         self.title = title
-        if title == "Non-viewable":
+
+        if title == "Non-viewable" or mediaState == "MEDIA_OFF":
             self.viewable = False
 
     @staticmethod
@@ -36,6 +37,7 @@ class Feed(object):
                 feed_name = item["feedName"]
             except KeyError:
                 feed_name = ""
+
             if feed_name != "":
                 if tv_station != "":
                     title = "%s (%s %s)" % (feed_name, tv_station, feed_type)
@@ -52,9 +54,9 @@ class Feed(object):
                    'NONVIEWABLE': "Non-viewable"
                 }.get(feed_type, "%s (%s)" % (tv_station, feed_type))
             if "id" in item:
-                return Feed(item["id"], title)
+                return Feed(item["id"], title, item['mediaState'])
             else:
-                return Feed(item["mediaPlaybackId"], title)
+                return Feed(item["mediaPlaybackId"], title, item['mediaState'])
         if "media" in content:
             return [fromItem(item)
                     for stream in content["media"]["epg"] if stream["title"] in ["MLBTV", "NHLTV"]
