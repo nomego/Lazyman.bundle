@@ -14,6 +14,7 @@ THUMB_MLB = 'mlb_logo.jpg'
 ICON = 'LM.png'
 
 DAYS_TO_SHOW = 10
+GAMES_TO_SHOW = 30
 PAGE_LIMIT = 100
 NAME = 'Lazyman'
 
@@ -44,15 +45,43 @@ def MainMenu():
 
 def SelectDate(sport):
 	oc = ObjectContainer(title2="Select Date")
-	time_delta = datetime.timedelta(days=1)
 	date = datetime.date.today()
 
-	for i in range(DAYS_TO_SHOW):
-		oc.add(DirectoryObject(
-			key=Callback(Date, date=date, sport=sport),
-			title=date.strftime("%d %B %Y")),
-		)
-		date = date - time_delta
+	if sport == "mlb":
+		time_delta = datetime.timedelta(days=1)
+		for i in range(DAYS_TO_SHOW):
+	 		oc.add(DirectoryObject(
+	 			key=Callback(Date, date=date, sport=sport),
+				title=date.strftime("%d %B %Y")),
+	 		)
+			date = date - time_delta
+	else:
+		time_delta = datetime.timedelta(days=30)
+
+		while len(oc.objects) < GAMES_TO_SHOW:
+			# Look 'time_delta' days back for games that have occurred
+			scheduleUrl = GAME_SCHEDULE_URL_NHL % (date - time_delta, date)
+			schedule = JSON.ObjectFromURL(scheduleUrl)
+
+			# Add any dates that had games occur to a list of dates for later
+			# use
+			if schedule["totalItems"] > 0 or len(schedule["dates"]) != 0:
+
+				# The list is reversed so we get more recent dates first
+				for day in reversed(schedule['dates']):
+					# The string is in YEAR-MONTH-DAY format
+					splitDate = day['date'].split('-')
+
+					# Create a 'date' object
+					tempDate = datetime.date(int(splitDate[0]), int(splitDate[1]), int(splitDate[2]))
+
+					# Add the date
+					oc.add(DirectoryObject(
+						key=Callback(Date, date=tempDate, sport=sport),
+						title=day['date']),
+					)
+			# Change the date by 'time_delta' to contine looking for more games
+			date = date - time_delta
 
 	return oc 
 
