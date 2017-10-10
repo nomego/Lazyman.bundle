@@ -1,0 +1,15 @@
+[
+    {
+        "id": "show_scores",
+        "label": "Show scores for recaps",
+        "type": "bool",
+        "default": "true"
+    },
+    {
+        "id": "quality",
+        "type": "enum",
+        "label": "Quality",
+        "values": ["Auto", "720p60", "720p", "540p", "504p", "360p", "288p"],
+        "default": "Auto"
+    }
+]
