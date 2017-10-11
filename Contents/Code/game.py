@@ -79,10 +79,7 @@ class Recap(object):
     def fromContent(content, content_title, sport):
         def fromItem(item):
             recap = Recap()
-            if Prefs['show_scores']:
-            	recap.title = item["title"]
-            else:
-            	recap.title = 'Recap'
+            recap.title = item["title"]
             recap.summary = item["description"]
             recap.year = int(item["date"][0:4])
             recap.studio = sport
