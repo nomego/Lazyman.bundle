@@ -225,18 +225,13 @@ def getStreamVCO(date, game, feed):
 						]
 					)
 
-				if Prefs['quality'] == 'Auto':
-					if int(height_s) < best_height or float(fps_s) < best_fps:
-						objects.append(media_object)
-					else:
-						best_height = int(height_s)
-						best_fps = float(fps_s)
-						objects.insert(0, media_object)
-				elif Prefs['quality'] == '720p60' and float(fps_s) == 59.94:
+				if int(height_s) < best_height or float(fps_s) < best_fps:
 					objects.append(media_object)
-				elif Prefs['quality'] == media_object.video_resolution+'p':
-					objects.append(media_object)
-									
+				else:
+					best_height = int(height_s)
+					best_fps = float(fps_s)
+					objects.insert(0, media_object)
+
 		STREAM_CACHE[game.game_id][feed.mediaId] = objects
 		return objects
 
