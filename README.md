@@ -33,3 +33,11 @@ Recaps and highlights are not part of the Lazyman solution but is offered in the
 
 ### Non-Working
 * iOS app
+  * Workaround: Copy and modify the iOS.xml (or tvOS.xml) profile to your Plex data directory to disable Direct Play of HTTPS Live Streaming content.
+  1. Locate the iOS.xml file in the Plex install directory (note this location for later).
+  3. Locate your Plex [data directory](https://support.plex.tv/hc/en-us/articles/202915258-Where-is-the-Plex-Media-Server-data-directory-located-) and create a new folder called 'Profiles'.
+  4. Copy the iOS.xml file to the newly created 'Profiles' folder.
+  5. Modify the iOS.xml file and ensure the following lines are commented out (top line is alreeady a comment, use the '<!--' and '-->' notation on the next line to match. Your file should have two lines that look like this:
+    '<!-- Allow Direct Play of HLS content  -->
+     <!-- <VideoProfile protocol="hls" container="mpegts" codec="h264" audioCodec="aac" /> -->'
+  6. Save the file and restart PMS.
