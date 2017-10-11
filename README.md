@@ -12,7 +12,8 @@ Recaps and highlights are not part of the Lazyman solution but is offered in the
 ## Installation - Prerequisites
  * Modify your `hosts` file to work with Lazyman on the machine running Plex Media Server:
  1. From a command prompt or terminal window, type `ping nhl.freegamez.gq` and note the IP address supplied in the output.
- 2. Locate the hosts file for your OS (the location can vary so if you don't know it's best to google for something like "hosts file location [your OS/NAS here]").
+ 2. Locate the hosts file for your OS.
+    * *The location of this file can vary depending on OS so if you don't know it's best to google for something like "**hosts file location [your OS/NAS here]**".*
  3. Modify the hosts file to include the following two lines:
  ```
  x.x.x.x mf.svc.nhl.com
@@ -25,8 +26,8 @@ Recaps and highlights are not part of the Lazyman solution but is offered in the
 1. Install the [WebTools](https://github.com/ukdtom/WebTools.bundle/wiki/V2Home) PMS Plug-in.
 2. Connect to the WebTools interface, sign in, and navigate to the Unsupported AppStore module.
 3. Click the **Video** tab and locate the LazyMan entry (Note: you can also search for 'lazyman' using the search box).
-4. On the LazyMan entry, click **Install**.
-*Note: You can also copy this repo URL and paste into the GitHub installer section.
+4. On the LazyMan entry, click **Install**.  
+*Note: If the above steps don't help to locate the plugin, you can also copy this repo URL and paste into the GitHub installer section.*
 
 ## Updating - Usupported AppStore
 1. Connect to the WebTools interface, sign in, and navigate to the Unsupported AppStore module.
