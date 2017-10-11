@@ -10,18 +10,33 @@ Installing the plug-in on a weaker NAS and using a limited client will not work.
 Recaps and highlights are not part of the Lazyman solution but is offered in the same NHL API and are added for convenience. These are MP4 files and not streams so they should generally work better on most devices. They will also work (or not work) without `/etc/hosts` changes.
 
 ## Installation - Prerequisites
-1. [Setup the /etc/hosts file with the Lazyman configuration](https://www.reddit.com/r/nhl_games/comments/5ur6yp/psa_if_the_app_didnt_modify_your_hosts_file/) on the machine running Plex Media Server
+ * Modify your `hosts` file to work with Lazyman on the machine running Plex Media Server:
+ 1. From a command prompt or terminal window, type `ping nhl.freegamez.gq` and note the IP address supplied in the output.
+ 2. Locate the hosts file for your OS (the location can vary so if you don't know it's best to google for something like "hosts file location [your OS/NAS here]").
+ 3. Modify the hosts file to include the following two lines:
+ ```
+ x.x.x.x mf.svc.nhl.com
+ x.x.x.x mlb-ws-mf.media.mlb.com
+ ```
+ *Where x.x.x.x is the IP address discovered from step 1.*
 
-## Installation - Semi-automatic
-1. Install the [WebTools]() PMS Plug-in.
+## Installation - Unsupported AppStore
+*If you already have WebTools/UAS installed, skip to step 2.*
+1. Install the [WebTools](https://github.com/ukdtom/WebTools.bundle/wiki/V2Home) PMS Plug-in.
+2. Connect to the WebTools interface, sign in, and navigate to the Unsupported AppStore module.
+3. Click the **Video** tab and locate the LazyMan entry (Note: you can also search for 'lazyman' using the search box).
+4. On the LazyMan entry, click **Install**.
+*Note: You can also copy this repo URL and paste into the GitHub installer section.
+
+## Updating - Usupported AppStore
+1. Connect to the WebTools interface, sign in, and navigate to the Unsupported AppStore module.
+2. Click the **Video** tab and locate the LazyMan entry (Note: you can also search for 'lazyman' using the search box).
+3. On the LazyMan entry, click **Re-Install with latest available**.
 
 ## Installation - Manual
 1. [Find your Plex Media Server Plug-in directory](https://support.plex.tv/hc/en-us/articles/201106098-How-do-I-find-the-Plug-Ins-folder-)
 2. [Install git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 3. In the Plug-in folder, clone the repo (install the plugin): `git clone https://github.com/nomego/Lazyman.bundle`
-
-## Updating - Semi-automatic
-1. 
 
 ## Updating - Manual
 1. Enter the `Lazyman.bundle` folder in your Plug-in folder and run `git pull`
