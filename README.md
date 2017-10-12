@@ -14,10 +14,9 @@ Recaps and highlights are not part of the Lazyman solution but is offered in the
 ## Prerequisites
 ### Modify hosts file
  * Modify your `hosts` file to work with Lazyman on the machine running Plex Media Server:
- 1. From a command prompt or terminal window, type `ping nhl.freegamez.gq` and note the IP address supplied in the output.
- 2. Locate the hosts file for your OS.
-    * *The location of this file can vary depending on OS so if you don't know it's best to google for something like "**hosts file location [your OS/NAS here]**".*
- 3. Modify the hosts file to include the following two lines:
+   * *The location of this file and how you modify it can vary depending on OS. Please see [this page](https://www.siteground.com/kb/how_to_use_the_hosts_file/) for relevant instructions to most systems.
+ 1. From a command prompt or terminal window, type `ping nhl.zipstreams.net` and note the IP address supplied in the output.
+ 2. Locate and modify the hosts file for your OS to include the following two lines:
  ```
  x.x.x.x mf.svc.nhl.com
  x.x.x.x mlb-ws-mf.media.mlb.com
