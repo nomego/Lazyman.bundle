@@ -122,7 +122,7 @@ def getRecapVCO(date, type, recap, sport):
 		for video in videos:
 			bitrate = int(video["name"].split("_")[1][0:-1])
 			height = int(video["height"])
-			if int(Prefs['quality'][0:3]) == height:
+			if Prefs['quality'][0:3] == str(height):
 				objects.insert(0, MediaObject(
 					container = Container.MP4,
 					video_codec = VideoCodec.H264,
