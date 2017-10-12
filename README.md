@@ -1,13 +1,15 @@
 # Lazyman.bundle
 Lazyman Plex Channel to access Lazyman streams along with recaps and extended highlights.
 
-## Streaming and transcoding
+
+## Streaming and Transcoding
 As far as I gather, the Plex Media Server where the plug-in is installed need to be powerful enough to transcode the HLS (HTTP Live Streaming) streams.
 It might work with a transcoding client such as Plex Media Player or OpenPHT on a computer, not verified.
 Installing the plug-in on a weaker NAS and using a limited client will not work.
 
-### Recaps and highlights
+### Recaps and Highlights
 Recaps and highlights are not part of the Lazyman solution but is offered in the same NHL API and are added for convenience. These are MP4 files and not streams so they should generally work better on most devices. They will also work (or not work) without changes to your `hosts` file.
+
 
 ## Prerequisites
 ### Modify hosts file
@@ -22,6 +24,7 @@ Recaps and highlights are not part of the Lazyman solution but is offered in the
  ```
  *Where x.x.x.x is the IP address noted from step 1.*
 
+
 ## Installation
 ### Unsupported AppStore Method
 *If you already have WebTools/UAS installed, skip to step 2.*
@@ -35,6 +38,7 @@ Recaps and highlights are not part of the Lazyman solution but is offered in the
 2. [Install git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 3. In the Plug-in folder, clone the repo (install the plugin): `git clone https://github.com/nomego/Lazyman.bundle`
 
+
 ## Updating
 ### Unsupported AppStore Method
 1. Connect to the WebTools interface, sign in, and navigate to the Unsupported AppStore module.
@@ -42,6 +46,7 @@ Recaps and highlights are not part of the Lazyman solution but is offered in the
 3. On the LazyMan entry, click **Re-Install with latest available**.
 ### Manual Method
 1. Enter the `Lazyman.bundle` folder in your Plug-in folder and run `git pull`
+
 
 ## Clients
 ### Working
