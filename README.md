@@ -7,7 +7,7 @@ It might work with a transcoding client such as Plex Media Player or OpenPHT on 
 Installing the plug-in on a weaker NAS and using a limited client will not work.
 
 ### Recaps and highlights
-Recaps and highlights are not part of the Lazyman solution but is offered in the same NHL API and are added for convenience. These are MP4 files and not streams so they should generally work better on most devices. They will also work (or not work) without `/etc/hosts` changes.
+Recaps and highlights are not part of the Lazyman solution but is offered in the same NHL API and are added for convenience. These are MP4 files and not streams so they should generally work better on most devices. They will also work (or not work) without changes to your `hosts` file.
 
 ## Installation - Prerequisites
  * Modify your `hosts` file to work with Lazyman on the machine running Plex Media Server:
@@ -19,7 +19,7 @@ Recaps and highlights are not part of the Lazyman solution but is offered in the
  x.x.x.x mf.svc.nhl.com
  x.x.x.x mlb-ws-mf.media.mlb.com
  ```
- *Where x.x.x.x is the IP address discovered from step 1.*
+ *Where x.x.x.x is the IP address noted from step 1.*
 
 ## Installation - Unsupported AppStore
 *If you already have WebTools/UAS installed, skip to step 2.*
@@ -61,8 +61,8 @@ Recaps and highlights are not part of the Lazyman solution but is offered in the
   * *Note: This should also work for the tvOS.xml profile.*
  1. Locate the iOS.xml file in the Plex install directory (note this location for later).
  2. Locate your Plex [data directory](https://support.plex.tv/hc/en-us/articles/202915258-Where-is-the-Plex-Media-Server-data-directory-located-) and create a new folder called **Profiles**.
- 3. Copy the iOS.xml file to the newly created **Profiles** folder.
- 4. Modify the iOS.xml file and ensure the following lines are commented out (top line is alreeady a comment, use the `<!--` and `-->` notation on the next line to match). Your file should have two lines that look like this:  
+ 3. Copy the iOS.xml file (from the directory noted in step 1) to the newly created **Profiles** folder.
+ 4. Modify the iOS.xml file and ensure the following lines are commented out (top line is already a comment, use the `<!--` and `-->` notation on the next line to match). Your file should have two lines that look like this:  
 ```
 <!-- Allow Direct Play of HLS content  -->
 <!-- <VideoProfile protocol="hls" container="mpegts" codec="h264" audioCodec="aac" /> -->
