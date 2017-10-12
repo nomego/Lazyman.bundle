@@ -79,7 +79,7 @@ class Recap(object):
     def fromContent(content, content_title, sport):
         def fromItem(item):
             recap = Recap()
-            if Prefs['show_scores']:
+            if Prefs['show_scores'] or "Recap" not in item["title"]:
             	recap.title = item["title"]
             else:
             	recap.title = 'Recap'

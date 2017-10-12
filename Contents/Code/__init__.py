@@ -357,3 +357,6 @@ def GetMediaAuth():
 	garbled = ''.join(random.sample(salt, len(salt)))
 	auth = ''.join([garbled[int(i * random.random()) % len(garbled)] for i in range(0,241)])
 	return auth
+	
+def ValidatePrefs():
+	return None
