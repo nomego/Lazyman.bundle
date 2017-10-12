@@ -18,4 +18,5 @@
     	"label": "CDN",
     	"values": ["Akamai", "Level 3"],
     	"default": "Akamai"
+    }
 ]
