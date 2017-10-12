@@ -29,7 +29,7 @@ Recaps and highlights are not part of the Lazyman solution but is offered in the
 4. On the LazyMan entry, click **Install**.  
 *Note: If the above steps don't help to locate the plugin, you can also copy this repo URL and paste into the GitHub installer section.*
 
-## Updating - Usupported AppStore
+## Updating - Unsupported AppStore
 1. Connect to the WebTools interface, sign in, and navigate to the Unsupported AppStore module.
 2. Click the **Video** tab and locate the LazyMan entry (Note: you can also search for 'lazyman' using the search box).
 3. On the LazyMan entry, click **Re-Install with latest available**.
