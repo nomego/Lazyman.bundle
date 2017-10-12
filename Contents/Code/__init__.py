@@ -157,7 +157,10 @@ def getStreamVCO(date, game, feed):
 		if STREAM_CACHE[game.game_id].get(feed.mediaId) != None:
 			return STREAM_CACHE[game.game_id][feed.mediaId]
 		
-		cdn = 'akc'
+		if Prefs['cdn'] == "Level 3":
+			cdn = "l3c"
+		else:
+			cdn = "akc"
 		if game.sport == "nhl":
 			url = "http://mf.svc.nhl.com/m3u8/%s/%s" % (date, feed.mediaId)
 		else:
