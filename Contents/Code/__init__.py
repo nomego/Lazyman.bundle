@@ -122,18 +122,34 @@ def getRecapVCO(date, type, recap, sport):
 		for video in videos:
 			bitrate = int(video["name"].split("_")[1][0:-1])
 			height = int(video["height"])
-			objects.insert(0, MediaObject(
-				container = Container.MP4,
-				video_codec = VideoCodec.H264,
-				audio_codec = AudioCodec.AAC,
-				video_resolution = height,
-				audio_channels = 2,
-				height = height,
-				width = int(video["width"]),
-				parts = [
-					PartObject(key=Callback(PlayRecap, url=video["url"]))
-				]
-			))
+			if Prefs['quality'][0:3] == str(height):
+				objects.insert(0, MediaObject(
+					container = Container.MP4,
+					video_codec = VideoCodec.H264,
+					audio_codec = AudioCodec.AAC,
+					video_resolution = height,
+					audio_channels = 2,
+					height = height,
+					width = int(video["width"]),
+					parts = [
+						PartObject(key=Callback(PlayRecap, url=video["url"]))
+					]
+				))
+			else:
+				objects.append(MediaObject(
+					container = Container.MP4,
+					video_codec = VideoCodec.H264,
+					audio_codec = AudioCodec.AAC,
+					video_resolution = height,
+					audio_channels = 2,
+					height = height,
+					width = int(video["width"]),
+					parts = [
+						PartObject(key=Callback(PlayRecap, url=video["url"]))
+					]
+				))
+		if Prefs['quality'] == 'Auto':
+			objects.sort(key=lambda o: o.video_resolution, reverse=True)
 		return objects
 
 	return VideoClipObject(
@@ -157,7 +173,10 @@ def getStreamVCO(date, game, feed):
 		if STREAM_CACHE[game.game_id].get(feed.mediaId) != None:
 			return STREAM_CACHE[game.game_id][feed.mediaId]
 		
-		cdn = 'akc'
+		if Prefs['cdn'] == "Level 3":
+			cdn = "l3c"
+		else:
+			cdn = "akc"
 		if game.sport == "nhl":
 			url = "http://mf.svc.nhl.com/m3u8/%s/%s" % (date, feed.mediaId)
 		else:
@@ -225,12 +244,19 @@ def getStreamVCO(date, game, feed):
 						]
 					)
 
-				if int(height_s) < best_height or float(fps_s) < best_fps:
-					objects.append(media_object)
-				else:
-					best_height = int(height_s)
-					best_fps = float(fps_s)
+				if Prefs['quality'] == 'Auto':
+					if int(height_s) < best_height or float(fps_s) < best_fps:
+						objects.append(media_object)
+					else:
+						best_height = int(height_s)
+						best_fps = float(fps_s)
+						objects.insert(0, media_object)
+				elif Prefs['quality'] == '720p60' and round(float(fps_s)) == 60.0:
 					objects.insert(0, media_object)
+				elif Prefs['quality'] == media_object.video_resolution+'p':
+					objects.insert(0, media_object)
+				else:
+					objects.append(media_object)
 
 		STREAM_CACHE[game.game_id][feed.mediaId] = objects
 		return objects
@@ -331,3 +357,6 @@ def GetMediaAuth():
 	garbled = ''.join(random.sample(salt, len(salt)))
 	auth = ''.join([garbled[int(i * random.random()) % len(garbled)] for i in range(0,241)])
 	return auth
+	
+def ValidatePrefs():
+	return None
