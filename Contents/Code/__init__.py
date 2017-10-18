@@ -327,7 +327,7 @@ def StreamMetadata(date, gameid, mediaId, sport, **kwargs):
 	oc.add(getStreamVCO(date, game, feed))
 	return oc
 
-def RecapMetadata(type, date, recapid, sport):
+def RecapMetadata(type, date, recapid, sport, includeBandwidths=None):
 	game_cache = GetCache(date, sport)
 	recap = None
 	for g in game_cache:
