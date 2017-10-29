@@ -178,9 +178,9 @@ def getStreamVCO(date, game, feed):
 		else:
 			cdn = "akc"
 		if game.sport == "nhl":
-			url = "http://mf.svc.nhl.com/m3u8/%s/%s" % (date, feed.mediaId)
+			url = "http://zipstreams.net/m3u8/%s/%s" % (date, feed.mediaId)
 		else:
-		   url = "http://nhl.zipstreams.net/mlb/m3u8/%s/%s" % (date, feed.mediaId)
+		   url = "http://zipstreams.net/mlb/m3u8/%s/%s" % (date, feed.mediaId)
 		try:
 			real_url = HTTP.Request(url + cdn).content
 		except:
