@@ -4,7 +4,7 @@ import re
 
 from game import Game
 
-GAME_SCHEDULE_URL_NHL = "http://statsapi.web.nhl.com/api/v1/schedule?startDate=%s&endDate=%s&expand=schedule.teams,schedule.linescore,schedule.broadcasts.all,schedule.ticket,schedule.game.content.media.epg"
+GAME_SCHEDULE_URL_NHL = "http://statsapi.web.nhl.com/api/v1/schedule?startDate=%s&endDate=%s&expand=schedule.teams,schedule.linescore,schedule.game.content.media.epg"
 GAME_SCHEDULE_URL_MLB = "http://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=%s&endDate=%s&hydrate=team,linescore,flags,liveLookin,person,stats,probablePitcher,game(content(summary,media(epg)),tickets)&language=en"
 
 ART_NHL = 'nhlbg.jpg'
@@ -14,7 +14,7 @@ THUMB_MLB = 'mlb_logo.jpg'
 ICON = 'LM.png'
 
 DAYS_TO_SHOW = 10
-GAMES_TO_SHOW = 30
+MINIMUM_GAMEDAYS_TO_SHOW = 15
 PAGE_LIMIT = 100
 NAME = 'Lazyman'
 
@@ -35,15 +35,23 @@ def MainMenu():
 	oc = ObjectContainer()
 	oc.add(DirectoryObject(
 		key=Callback(SelectDate, sport="nhl"),
-		title="NHL"
+		title="NHL",
+		summary="National Hockey League",
+		thumb=R(THUMB_NHL)
 	))
 	oc.add(DirectoryObject(
 		key=Callback(SelectDate, sport="mlb"),
-		title="MLB"
+		title="MLB",
+		summary="Major League Baseball",
+		thumb=R(THUMB_MLB)
 	))
 	return oc
 
+
+####################################################################################################
+@route('/video/lazyman/selectdate')
 def SelectDate(sport):
+
 	oc = ObjectContainer(title2="Select Date")
 	date = datetime.date.today()
 
@@ -55,33 +63,38 @@ def SelectDate(sport):
 				title=date.strftime("%d %B %Y")),
 	 		)
 			date = date - time_delta
-	else:
-		time_delta = datetime.timedelta(days=30)
+		return oc
 
-		while len(oc.objects) < GAMES_TO_SHOW:
+	if date.strftime("%Y-%m-%d") not in GAME_CACHE:
+		time_delta = datetime.timedelta(days=25)
+
+		while len(GAME_CACHE) < MINIMUM_GAMEDAYS_TO_SHOW:
 			# Look 'time_delta' days back for games that have occurred
 			scheduleUrl = GAME_SCHEDULE_URL_NHL % (date - time_delta, date)
 			schedule = JSON.ObjectFromURL(scheduleUrl)
 
-			# Add any dates that had games occur to a list of dates for later
-			# use
+			# Add any dates that had games occur to a list of dates for later use
 			if schedule["totalItems"] > 0 or len(schedule["dates"]) != 0:
+				for day in schedule['dates']:
+					GAME_CACHE[day['date']] = Game.fromSchedule(schedule, day['date'])
 
-				# The list is reversed so we get more recent dates first
-				for day in reversed(schedule['dates']):
-					# The string is in YEAR-MONTH-DAY format
-					splitDate = day['date'].split('-')
-
-					# Create a 'date' object
-					tempDate = datetime.date(int(splitDate[0]), int(splitDate[1]), int(splitDate[2]))
-
-					# Add the date
-					oc.add(DirectoryObject(
-						key=Callback(Date, date=tempDate, sport=sport),
-						title=day['date']),
-					)
 			# Change the date by 'time_delta' to contine looking for more games
 			date = date - time_delta
+
+	for game_date in reversed(sorted(GAME_CACHE)):
+		splitDate = game_date.split('-')
+		tempDate = datetime.date(int(splitDate[0]), int(splitDate[1]), int(splitDate[2]))
+		title = "%s - %s games" % (tempDate.strftime("%A %d %B %Y"), len(GAME_CACHE[game_date]))
+		for game in GAME_CACHE[game_date]:
+			if game.state == "In Progress":
+				title = u"\U0001F3A5 " + title
+				break
+		oc.add(DirectoryObject(
+			key=Callback(Date, date=game_date, sport=sport),
+			title=title,
+			summary=u' \u22c5 '.join(map(lambda x: "%s @ %s" % (x.away_abbr, x.home_abbr), GAME_CACHE[game_date])),
+			thumb=R(THUMB_NHL)
+		))
 
 	return oc 
 
@@ -91,16 +104,19 @@ def Date(date, sport):
 
 	oc = ObjectContainer(title2="Games on %s" % (date), no_cache=True)
 	game_cache = GetCache(date, sport, True)
+	if sport == "mlb":
+		thumb = R(THUMB_MLB)
+	else:
+		thumb = R(THUMB_NHL)
 	for g in game_cache:
-		if sport=="mlb":
-			thumb = R(THUMB_MLB)
-		else:
-			thumb = R(THUMB_NHL)
 		if len(g.recaps) > 0:
 			thumb = g.recaps[0].image_url
+		title = g.title
+		if g.state == "In Progress":
+			title = u"\U0001F3A5 " + g.title
 		oc.add(DirectoryObject(
 			key=Callback(Feeds, date=date, game_id=g.game_id, sport=g.sport),
-			title=g.title,
+			title=title,
 			summary=g.summary,
 			thumb=thumb)
 		)
@@ -113,7 +129,7 @@ def GetCache(date, sport, refresh=False):
 		else:
 			scheduleUrl = GAME_SCHEDULE_URL_NHL % (date, date)
 		schedule = JSON.ObjectFromURL(scheduleUrl)
-		GAME_CACHE[date] = Game.fromSchedule(schedule)
+		GAME_CACHE[date] = Game.fromSchedule(schedule, date)
 	return GAME_CACHE[date]  
 
 def getRecapVCO(date, type, recap, sport):

@@ -147,14 +147,17 @@ class Game:
         return self.extended_highlights
 
     @staticmethod
-    def fromSchedule(data):
+    def fromSchedule(data, date):
         if data["totalItems"] <= 0 or len(data["dates"]) == 0:
             return []
         if "MLB" in data["copyright"]:
             sport = "mlb"
         else:
             sport = "nhl"
-        games = data["dates"][0]["games"]
+        for game_date in data["dates"]:
+            if game_date["date"] == date:
+                games = game_date["games"]
+                break
         def asGame(g):
             def remaining(state, time):
                 if "In Progress" in state:
