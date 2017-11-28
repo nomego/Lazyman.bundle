@@ -49,18 +49,26 @@ Recaps and highlights are not part of the Lazyman solution but is offered in the
 
 ## Clients
 ### Working
-* Web client
-* Android app
-* Casting from the Android/iOS app to Chromecast
-* Plex Media Player on macOS
+* Plex Web
+* Android
+* Chromecast
+  * Casting from iOS/Android
+  * Others not confirmed
+* Plex Media Player (macOS)
 * OpenPHT (unspecified)
-* Playstation 4 app
+* Playstation 4
   * Direct Play / Direct Stream needs to be turned off in settings (Thanks Sinematikz)
 * Roku (unconfirmed)
   * Plex app can only play recaps/highlights
   * Roku Media Player can only play streams (replays, live) (Thanks Sinematikz)
+* iOS
+  * Requires v4.20 or later
+  * Direct Play must be disabled from Settings > Advanced > Allow Direct Play
+* tvOS
+  * Requires v1.18 or later
+  * Direct Play must be disabled from Settings > Advanced > Allow Direct Play
 ### Non-Working
-* iOS app
+* iOS
   * Workaround: Copy and modify the iOS.xml profile to your Plex data directory to disable Direct Play of HTTPS Live Streaming content.
   * *Note: This should also work for the tvOS.xml profile.*
  1. Locate the iOS.xml file in the Plex install directory (note this location for later).
