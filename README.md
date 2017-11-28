@@ -68,4 +68,5 @@ Recaps and highlights are not part of the Lazyman solution but is offered in the
   * Requires v1.18 or later
   * Direct Play must be disabled from Settings > Advanced > Allow Direct Play
 ### Non-Working
-* Nothing that we know of! Please submit an issue if you see something.
+* Nothing to see here! Please submit an issue if you discover something.
+* If you're looking for the old iOS/tvOS workaround, see [this wiki entry](https://github.com/evilsparc/Lazyman.bundle/wiki/iOS-and-tvOS-Workaround-(deprecated)).
