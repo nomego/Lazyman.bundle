@@ -209,7 +209,7 @@ class Game:
 						away["division"]["name"], away["conference"]["name"],
 						g["venue"]["name"]
 					)
-				except:
+				except KeyError:
 					game.summary = "Unknown"
             else:
                 game.title = "%s @ %s (%s)" % (away["teamName"], home["teamName"], datetime.strftime(game.time-timedelta(hours=4), "%I:%M%p").lstrip("0"))
