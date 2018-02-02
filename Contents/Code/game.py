@@ -201,16 +201,16 @@ class Game:
             if sport == "nhl":
                 game.title = "%s @ %s (%s)" % (away["teamName"], home["teamName"], game.time_remaining)
                 summary_format = "%s (%s) from %s (%s) hosts %s (%s) from %s (%s) at %s"
-				try:
-					game.summary = summary_format % (
-						game.home_full_name, record(g["teams"]["home"]["leagueRecord"]),
-						home["division"]["name"], home["conference"]["name"],
-						game.away_full_name, record(g["teams"]["away"]["leagueRecord"]),
-						away["division"]["name"], away["conference"]["name"],
-						g["venue"]["name"]
-					)
-				except KeyError:
-					game.summary = "Unknown"
+		try:
+			game.summary = summary_format % (
+			game.home_full_name, record(g["teams"]["home"]["leagueRecord"]),
+			home["division"]["name"], home["conference"]["name"],
+			game.away_full_name, record(g["teams"]["away"]["leagueRecord"]),
+			away["division"]["name"], away["conference"]["name"],
+			g["venue"]["name"]
+			)
+		except KeyError:
+			game.summary = "Unknown"
             else:
                 game.title = "%s @ %s (%s)" % (away["teamName"], home["teamName"], datetime.strftime(game.time-timedelta(hours=4), "%I:%M%p").lstrip("0"))
                 summary_format = "%s (%s) from %s hosts %s (%s) from %s at %s"
