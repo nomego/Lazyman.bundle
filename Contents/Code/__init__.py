@@ -198,7 +198,7 @@ def getStreamVCO(date, game, feed):
 		else:
 		   url = "http://powersports.ml/mlb/m3u8/%s/%s" % (date, feed.mediaId)
 		try:
-			real_url = HTTP.Request(url + cdn).content
+			real_url = HTTP.Request(url + cdn).content.replace('https', 'http')
 		except:
 			return []
 
