@@ -20,6 +20,7 @@ Recaps and highlights are not part of the Lazyman solution but is offered in the
  ```
  x.x.x.x mf.svc.nhl.com
  x.x.x.x mlb-ws-mf.media.mlb.com
+ x.x.x.x playback.svcs.mlb.com
  ```
  *Where x.x.x.x is the IP address noted from step 1.*
 
