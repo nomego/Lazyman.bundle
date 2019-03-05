@@ -71,7 +71,7 @@ def SelectDate(sport):
 		while len(GAME_CACHE) < MINIMUM_GAMEDAYS_TO_SHOW:
 			# Look 'time_delta' days back for games that have occurred
 			scheduleUrl = GAME_SCHEDULE_URL_NHL % (date - time_delta, date)
-			schedule = JSON.ObjectFromURL(scheduleUrl)
+			schedule = JSON.ObjectFromURL(scheduleUrl, max_size=9000000)
 
 			# Add any dates that had games occur to a list of dates for later use
 			if schedule["totalItems"] > 0 or len(schedule["dates"]) != 0:
