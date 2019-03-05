@@ -212,13 +212,21 @@ class Game:
 		except KeyError:
 			game.summary = "Unknown"
             else:
+		try:
+                       home_division = home["division"]["name"]
+                except KeyError:
+                       home_division = "NCAA"
+                try:
+                       away_division = away["division"]["name"]
+                except KeyError:
+                       away_division = "NCAA"
                 game.title = "%s @ %s (%s)" % (away["teamName"], home["teamName"], datetime.strftime(game.time-timedelta(hours=4), "%I:%M%p").lstrip("0"))
                 summary_format = "%s (%s) from %s hosts %s (%s) from %s at %s"
                 game.summary = summary_format % (
                     game.home_full_name, record(g["teams"]["home"]["leagueRecord"]),
-                    home["division"]["name"], 
+                    home_division, 
                     game.away_full_name, record(g["teams"]["away"]["leagueRecord"]),
-                    away["division"]["name"], g["venue"]["name"]
+                    away_division, g["venue"]["name"]
                 )
 
             return game
