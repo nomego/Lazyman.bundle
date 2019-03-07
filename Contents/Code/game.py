@@ -190,7 +190,12 @@ class Game:
                 game.time_remaining = remaining(game.state, game.time)
             game.away_full_name = away["name"]
             game.home_full_name = home["name"]
-            game.feeds = Feed.fromContent(g["content"], game.home_abbr, game.away_abbr)
+            try:
+                game.feeds = Feed.fromContent(g["content"], game.home_abbr, game.away_abbr)
+            except KeyError:
+                game.title = "%s @ %s" % (away["teamName"], home["teamName"])
+                game.summary = "Game has no broadcast."
+                return game
             if sport == "nhl":
                 game.recaps = Recap.fromContent(g["content"], "Recap", "NHL")
                 game.extended_highlights = Recap.fromContent(g["content"], "Extended Highlights", "NHL")
