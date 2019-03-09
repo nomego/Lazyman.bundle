@@ -173,7 +173,7 @@ class Game:
                     dt = datetime(1,1,1) + delta
                     return "Starts in %sh %sm %ss" % (dt.hour, dt.minute, dt.second)
             def mlb_remaining(state, time):
-                if "In Progress" in state:
+                if "Live" in state:
                     inning = g["linescore"]["currentInningOrdinal"]
                     half = g["linescore"]["inningHalf"]
                     return "%s %s" % (half, inning)
@@ -198,7 +198,7 @@ class Game:
             if sport == "nhl":
                 game.time_remaining = nhl_remaining(game.state, game.time)
             else:
-                game.time_remaining = mlb_remaining(game.state, game.time)
+                game.time_remaining = mlb_remaining(g["status"]["abstractGameState"], game.time)
             game.away_full_name = away["name"]
             game.home_full_name = home["name"]
             try:
