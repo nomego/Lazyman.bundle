@@ -311,7 +311,11 @@ def Feeds(date, game_id, sport):
 	oc = ObjectContainer(title2="Feeds for %s" % g.title, no_cache=True)
 
 	for f in filter(lambda f: f.viewable, game.feeds):
-		oc.add(getStreamVCO(date, game, f))
+		try:
+			oc.add(getStreamVCO(date, game, f))
+		except:
+			oc.add(DirectoryObject(title = "Game feed expired.", summary = "Full game feed expired.", thumb=R(THUMB_NHL)))
+			break
 
 	for r in game.recaps:
 		if r.videos == None:
@@ -343,7 +347,7 @@ def StreamMetadata(date, gameid, mediaId, sport, **kwargs):
 	oc.add(getStreamVCO(date, game, feed))
 	return oc
 
-def RecapMetadata(type, date, recapid, sport, includeBandwidths=None):
+def RecapMetadata(type, date, recapid, sport, includeBandwidths=None, **kwargs):
 	game_cache = GetCache(date, sport)
 	recap = None
 	for g in game_cache:
