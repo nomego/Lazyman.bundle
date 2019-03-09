@@ -159,7 +159,7 @@ class Game:
                 games = game_date["games"]
                 break
         def asGame(g):
-            def remaining(state, time):
+            def nhl_remaining(state, time):
                 if "In Progress" in state:
                     period = g["linescore"]["currentPeriodOrdinal"]
                     time_left = g["linescore"]["currentPeriodTimeRemaining"]
@@ -172,6 +172,15 @@ class Game:
                         return "Started"
                     dt = datetime(1,1,1) + delta
                     return "Starts in %sh %sm %ss" % (dt.hour, dt.minute, dt.second)
+            def mlb_remaining(state, time):
+                if "In Progress" in state:
+                    inning = g["linescore"]["currentInningOrdinal"]
+                    half = g["linescore"]["inningHalf"]
+                    return "%s %s" % (half, inning)
+                elif "Final" in state:
+                    return "Final"
+                else:
+                    return "%s" % (datetime.strftime(game.time-timedelta(hours=4), "%I:%M%p").lstrip("0"))
             def record(rec):
                 if "ot" in rec:
                     return "%s-%s-%s" % (rec["wins"], rec["losses"], rec["ot"])
@@ -187,7 +196,9 @@ class Game:
             game.sport = sport
             
             if sport == "nhl":
-                game.time_remaining = remaining(game.state, game.time)
+                game.time_remaining = nhl_remaining(game.state, game.time)
+            else:
+                game.time_remaining = mlb_remaining(game.state, game.time)
             game.away_full_name = away["name"]
             game.home_full_name = home["name"]
             try:
@@ -225,7 +236,7 @@ class Game:
                        away_division = away["division"]["name"]
                 except KeyError:
                        away_division = "NCAA"
-                game.title = "%s @ %s (%s)" % (away["teamName"], home["teamName"], datetime.strftime(game.time-timedelta(hours=4), "%I:%M%p").lstrip("0"))
+                game.title = "%s @ %s (%s)" % (away["teamName"], home["teamName"], game.time_remaining)
                 summary_format = "%s (%s) from %s hosts %s (%s) from %s at %s"
                 game.summary = summary_format % (
                     game.home_full_name, record(g["teams"]["home"]["leagueRecord"]),
