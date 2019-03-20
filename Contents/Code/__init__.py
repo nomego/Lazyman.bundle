@@ -30,7 +30,7 @@ def Start():
 
 ####################################################################################################
 @handler('/video/lazyman', NAME, art=ICON, thumb=ICON)
-def MainMenu():
+def MainMenu(**kwargs):
 	oc = ObjectContainer()
 	oc.add(DirectoryObject(
 		key=Callback(SelectDate, sport="nhl"),
@@ -49,7 +49,7 @@ def MainMenu():
 
 ####################################################################################################
 @route('/video/lazyman/selectdate')
-def SelectDate(sport):
+def SelectDate(sport, **kwargs):
 
 	oc = ObjectContainer(title2="Select Date")
 	date = datetime.date.today()
@@ -96,7 +96,7 @@ def SelectDate(sport):
 
 ####################################################################################################
 @route('/video/lazyman/date')
-def Date(date, sport):
+def Date(date, sport, **kwargs):
 
 	oc = ObjectContainer(title2="Games on %s" % (date), no_cache=True)
 	game_cache = GetCache(date, sport, True)
@@ -296,7 +296,7 @@ def getStreamVCO(date, game, feed):
 	)
 
 @route('/video/lazyman/feeds')
-def Feeds(date, game_id, sport):
+def Feeds(date, game_id, sport, **kwargs):
 	game = None
 	game_cache = GetCache(date, sport)
 	for g in game_cache:
