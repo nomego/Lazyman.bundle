@@ -83,7 +83,10 @@ class Recap(object):
             	recap.title = item["title"]
             else:
             	recap.title = 'Recap'
-            recap.summary = item["description"]
+            try:
+                recap.summary = item["description"]
+            except KeyError:
+                recap.summary = item["blurb"] #fixes MLB forgetting a description
             recap.year = int(item["date"][0:4])
             recap.studio = sport
             recap.tagline = item["blurb"]
