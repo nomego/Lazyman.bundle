@@ -132,6 +132,20 @@ def getRecapVCO(date, type, recap, sport):
 	def getRecapItems(videos):
 		objects = []
 		for video in videos:
+			if sport == "mlb":
+				objects.insert(0, MediaObject(
+					container = Container.MP4,
+					video_codec = VideoCodec.H264,
+					audio_codec = AudioCodec.AAC,
+					video_resolution = 720,
+					audio_channels = 2,
+					height = 720,
+					width = 1280,
+					parts = [
+						PartObject(key=Callback(PlayRecap, url=video["url"]))
+					]
+				))
+				break
 			bitrate = int(video["name"].split("_")[1][0:-1])
 			height = int(video["height"])
 			if Prefs['quality'][0:3] == str(height):
