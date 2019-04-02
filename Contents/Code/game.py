@@ -87,7 +87,7 @@ class Recap(object):
             recap.year = int(item["date"][0:4])
             recap.studio = sport
             recap.tagline = item["blurb"]
-            recap.rid = item["id"]
+            recap.rid = item["mediaPlaybackId"]
             try:
                 min, sec = item["duration"].split(":")
                 hr = 0
@@ -107,14 +107,22 @@ class Recap(object):
                     widest = cut["width"]
             
             recap.image_url = pcut["src"]
-            recap.videos = [vid for vid in item["playbacks"] if vid["name"][0:5] == "FLASH"]
+            if sport == "MLB":
+                recap.videos = [vid for vid in item["playbacks"] if vid["name"] == "mp4Avc"]
+            else:
+                recap.videos = [vid for vid in item["playbacks"] if vid["name"][0:5] == "FLASH"]
             
             return recap
 
         if "media" in content:
-            return [fromItem(item)
-                    for stream in content["media"]["epg"] if stream["title"] == content_title
-                    for item in stream["items"]]
+            if sport == "MLB":
+                return [fromItem(item)
+                        for stream in content["media"]["epgAlternate"] if stream["title"] == content_title
+                        for item in stream["items"]]
+            else:
+                return [fromItem(item)
+                        for stream in content["media"]["epg"] if stream["title"] == content_title
+                        for item in stream["items"]]
         else:
             return []
 
