@@ -14,7 +14,7 @@ Recaps and highlights are not part of the Lazyman solution but is offered in the
 ## Prerequisites
 ### Modify hosts file
  * Modify your `hosts` file to work with Lazyman on the machine running Plex Media Server:
-   * *The location of this file and how you modify it can vary depending on OS. Please see [this page](https://www.siteground.com/kb/how_to_use_the_hosts_file/) for relevant instructions to most systems.
+   * The location of this file and how you modify it can vary depending on OS. Please see [this page](https://www.siteground.com/kb/how_to_use_the_hosts_file/) for relevant instructions to most systems.
  1. From a command prompt or terminal window, type `ping powersports.ml` and note the IP address supplied in the output.
  2. Locate and modify the hosts file for your OS to include the following two lines:
  ```
@@ -50,26 +50,24 @@ Recaps and highlights are not part of the Lazyman solution but is offered in the
 
 ## Clients
 ### Working
-* Web client
-* Android app
-* Casting from the Android/iOS app to Chromecast
-* Plex Media Player on macOS
+* Plex Web
+* Android
+* Chromecast
+  * Casting from iOS/Android
+  * Others not confirmed
+* Plex Media Player (macOS)
 * OpenPHT (unspecified)
-* Playstation 4 app
+* Playstation 4
   * Direct Play / Direct Stream needs to be turned off in settings (Thanks Sinematikz)
 * Roku (unconfirmed)
   * Plex app can only play recaps/highlights
   * Roku Media Player can only play streams (replays, live) (Thanks Sinematikz)
+* iOS
+  * Requires v4.20 or later
+  * Direct Play must be disabled from Settings > Advanced > Allow Direct Play
+* tvOS
+  * Requires v1.18 or later
+  * Direct Play must be disabled from Settings > Advanced > Allow Direct Play
 ### Non-Working
-* iOS app
-  * Workaround: Copy and modify the iOS.xml profile to your Plex data directory to disable Direct Play of HTTPS Live Streaming content.
-  * *Note: This should also work for the tvOS.xml profile.*
- 1. Locate the iOS.xml file in the Plex install directory (note this location for later).
- 2. Locate your Plex [data directory](https://support.plex.tv/hc/en-us/articles/202915258-Where-is-the-Plex-Media-Server-data-directory-located-) and create a new folder called **Profiles**.
- 3. Copy the iOS.xml file (from the directory noted in step 1) to the newly created **Profiles** folder.
- 4. Modify the iOS.xml file and ensure the following lines are commented out (top line is already a comment, use the `<!--` and `-->` notation on the next line to match). Your file should have two lines that look like this:  
-```
-<!-- Allow Direct Play of HLS content  -->
-<!-- <VideoProfile protocol="hls" container="mpegts" codec="h264" audioCodec="aac" /> -->
-```
- 5. Save the file and restart PMS.
+* Nothing to see here! Please submit an issue if you discover something.
+* If you're looking for the old iOS/tvOS workaround, see [this wiki entry](https://github.com/evilsparc/Lazyman.bundle/wiki/iOS-and-tvOS-Workaround-(deprecated)).
