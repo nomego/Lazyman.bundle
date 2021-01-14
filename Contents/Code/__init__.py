@@ -212,7 +212,7 @@ def getStreamVCO(date, game, feed):
             cdn = "l3c"
         else:
             cdn = "akc"
-        url = "http://nhl.freegamez.ga/getM3U8.php?league=%s&date=%s&id=%s&cdn=%s" % (
+        url = "http://freegamez.ga/getM3U8.php?league=%s&date=%s&id=%s&cdn=%s" % (
             game.sport.upper(), date, feed.mediaId, cdn)
         try:
             real_url = HTTP.Request(url).content.replace('https', 'http')
