@@ -155,6 +155,12 @@ def getRecapVCO(date, type, recap, sport):
                 ))
                 break
             bitrate = int(video["name"].split("_")[1][0:-1])
+
+            if video["height"] is None or video["height"] == "null":
+                video["height"] = 0
+            if video["width"] is None or video["width"] == "null":
+                video["width"] = 0
+
             height = int(video["height"])
             if Prefs['quality'][0:3] == str(height):
                 objects.insert(0, MediaObject(
