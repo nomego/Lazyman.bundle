@@ -7,6 +7,7 @@ VS_IMGS = {
     }
 }
 
+
 def GetVsImg(away, home):
     away_vs = VS_IMGS[away]
     if away_vs == None:
@@ -15,6 +16,7 @@ def GetVsImg(away, home):
     if img == None:
         return
     return "https://nhl.bamcontent.com/images/photos/%s/cut.jpeg" % img
+
 
 class Feed(object):
     mediaId = None
@@ -47,11 +49,11 @@ class Feed(object):
                 title = {
                     'AWAY': "%s (%s Away)" % (tv_station, away_abbr),
                     'HOME': "%s (%s Home)" % (tv_station, home_abbr),
-                   'FRENCH': "%s (French)" % (tv_station),
-                   'NATIONAL': "%s (National)" % (tv_station),
-                   'COMPOSITE': "3-Way Camera (Composite)",
-                   'ISO': 'Multi-Angle',
-                   'NONVIEWABLE': "Non-viewable"
+                    'FRENCH': "%s (French)" % (tv_station),
+                    'NATIONAL': "%s (National)" % (tv_station),
+                    'COMPOSITE': "3-Way Camera (Composite)",
+                    'ISO': 'Multi-Angle',
+                    'NONVIEWABLE': "Non-viewable"
                 }.get(feed_type, "%s (%s)" % (tv_station, feed_type))
             if "id" in item:
                 return Feed(item["id"], title, item['mediaState'])
@@ -63,6 +65,7 @@ class Feed(object):
                     for item in stream["items"]]
         else:
             return []
+
 
 class Recap(object):
     rid = None
@@ -79,17 +82,22 @@ class Recap(object):
     def fromContent(content, content_title, sport):
         def fromItem(item):
             recap = Recap()
-            if Prefs['show_scores'] or "Recap" not in item["title"]:
-            	recap.title = item["title"]
+            if 'blurb' in item:
+                blurb = item["blurb"]
             else:
-            	recap.title = 'Recap'
+                blurb = ""
+            if Prefs['show_scores'] or "Recap" not in item["title"]:
+                recap.title = item["title"]
+            else:
+                recap.title = 'Recap'
             try:
                 recap.summary = item["description"]
             except KeyError:
-                recap.summary = item["blurb"] #fixes MLB forgetting a description
+                # fixes MLB forgetting a description
+                recap.summary = blurb
             recap.year = int(item["date"][0:4])
             recap.studio = sport
-            recap.tagline = item["blurb"]
+            recap.tagline = blurb
             recap.rid = item["mediaPlaybackId"]
             try:
                 min, sec = item["duration"].split(":")
@@ -108,13 +116,15 @@ class Recap(object):
                 if cut["width"] > widest:
                     pcut = cut
                     widest = cut["width"]
-            
+
             recap.image_url = pcut["src"]
             if sport == "MLB":
-                recap.videos = [vid for vid in item["playbacks"] if vid["name"] == "mp4Avc"]
+                recap.videos = [vid for vid in item["playbacks"]
+                                if vid["name"] == "mp4Avc"]
             else:
-                recap.videos = [vid for vid in item["playbacks"] if vid["name"][0:5] == "FLASH"]
-            
+                recap.videos = [vid for vid in item["playbacks"]
+                                if vid["name"][0:5] == "FLASH"]
+
             return recap
 
         if "media" in content:
@@ -169,6 +179,7 @@ class Game:
             if game_date["date"] == date:
                 games = game_date["games"]
                 break
+
         def asGame(g):
             def nhl_remaining(state, time):
                 if "In Progress" in state:
@@ -181,8 +192,9 @@ class Game:
                     delta = time - datetime.utcnow()
                     if delta.days < 0:
                         return "Started"
-                    dt = datetime(1,1,1) + delta
+                    dt = datetime(1, 1, 1) + delta
                     return "Starts in %sh %sm %ss" % (dt.hour, dt.minute, dt.second)
+
             def mlb_remaining(state, time):
                 if "Live" in state:
                     inning = g["linescore"]["currentInningOrdinal"]
@@ -192,6 +204,7 @@ class Game:
                     return "Final"
                 else:
                     return "%s" % (datetime.strftime(game.time-timedelta(hours=4), "%I:%M%p").lstrip("0"))
+
             def record(rec):
                 if "ot" in rec:
                     return "%s-%s-%s" % (rec["wins"], rec["losses"], rec["ot"])
@@ -205,54 +218,65 @@ class Game:
             game.home_abbr = home["abbreviation"]
             game.state = g["status"]["detailedState"]
             game.sport = sport
-            
+
             if sport == "nhl":
                 game.time_remaining = nhl_remaining(game.state, game.time)
             else:
-                game.time_remaining = mlb_remaining(g["status"]["abstractGameState"], game.time)
+                game.time_remaining = mlb_remaining(
+                    g["status"]["abstractGameState"], game.time)
             game.away_full_name = away["name"]
             game.home_full_name = home["name"]
             try:
-                game.feeds = Feed.fromContent(g["content"], game.home_abbr, game.away_abbr)
+                game.feeds = Feed.fromContent(
+                    g["content"], game.home_abbr, game.away_abbr)
             except KeyError:
                 game.title = "%s @ %s" % (away["teamName"], home["teamName"])
                 game.summary = "Game has no broadcast."
                 return game
             if sport == "nhl":
                 game.recaps = Recap.fromContent(g["content"], "Recap", "NHL")
-                game.extended_highlights = Recap.fromContent(g["content"], "Extended Highlights", "NHL")
+                game.extended_highlights = Recap.fromContent(
+                    g["content"], "Extended Highlights", "NHL")
             else:
-                game.recaps = Recap.fromContent(g["content"], "Daily Recap", "MLB")
-                game.extended_highlights = Recap.fromContent(g["content"], "Extended Highlights", "MLB")
+                game.recaps = Recap.fromContent(
+                    g["content"], "Daily Recap", "MLB")
+                game.extended_highlights = Recap.fromContent(
+                    g["content"], "Extended Highlights", "MLB")
 
             if sport == "nhl":
-                game.title = "%s @ %s (%s)" % (away["teamName"], home["teamName"], game.time_remaining)
+                game.title = "%s @ %s (%s)" % (
+                    away["teamName"], home["teamName"], game.time_remaining)
                 summary_format = "%s (%s) from %s (%s) hosts %s (%s) from %s (%s) at %s"
-		try:
-			game.summary = summary_format % (
-			game.home_full_name, record(g["teams"]["home"]["leagueRecord"]),
-			home["division"]["name"], home["conference"]["name"],
-			game.away_full_name, record(g["teams"]["away"]["leagueRecord"]),
-			away["division"]["name"], away["conference"]["name"],
-			g["venue"]["name"]
-			)
-		except KeyError:
-			game.summary = "Unknown"
-            else:
-		try:
-                       home_division = home["division"]["name"]
-                except KeyError:
-                       home_division = "NCAA"
                 try:
-                       away_division = away["division"]["name"]
+                    game.summary = summary_format % (
+                        game.home_full_name, record(
+                            g["teams"]["home"]["leagueRecord"]),
+                        home["division"]["name"], home["conference"]["name"],
+                        game.away_full_name, record(
+                            g["teams"]["away"]["leagueRecord"]),
+                        away["division"]["name"], away["conference"]["name"],
+                        g["venue"]["name"]
+                    )
                 except KeyError:
-                       away_division = "NCAA"
-                game.title = "%s @ %s (%s)" % (away["teamName"], home["teamName"], game.time_remaining)
+                    game.summary = "Unknown"
+            else:
+                try:
+                    home_division = home["division"]["name"]
+                except KeyError:
+                    home_division = "NCAA"
+                try:
+                    away_division = away["division"]["name"]
+                except KeyError:
+                    away_division = "NCAA"
+                game.title = "%s @ %s (%s)" % (
+                    away["teamName"], home["teamName"], game.time_remaining)
                 summary_format = "%s (%s) from %s hosts %s (%s) from %s at %s"
                 game.summary = summary_format % (
-                    game.home_full_name, record(g["teams"]["home"]["leagueRecord"]),
-                    home_division, 
-                    game.away_full_name, record(g["teams"]["away"]["leagueRecord"]),
+                    game.home_full_name, record(
+                        g["teams"]["home"]["leagueRecord"]),
+                    home_division,
+                    game.away_full_name, record(
+                        g["teams"]["away"]["leagueRecord"]),
                     away_division, g["venue"]["name"]
                 )
 
