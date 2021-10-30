@@ -15,7 +15,7 @@ Recaps and highlights are not part of the Lazyman solution but is offered in the
 ### Modify hosts file
  * Modify your `hosts` file to work with Lazyman on the machine running Plex Media Server:
    * *The location of this file and how you modify it can vary depending on OS. Please see [this page](https://www.siteground.com/kb/how_to_use_the_hosts_file/) for relevant instructions to most systems.
- 1. From a command prompt or terminal window, type `ping powersports.ml` and note the IP address supplied in the output.
+ 1. From a command prompt or terminal window, type `ping freesports.ddns.net` and note the IP address supplied in the output.
  2. Locate and modify the hosts file for your OS to include the following two lines:
  ```
  x.x.x.x mf.svc.nhl.com
